@@ -1,0 +1,24 @@
+{
+  "name": "aeblekage-language",
+  "version": "0.0.1",
+  "description": "The æblekage programming language.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fmma/aeblekage-language.git"
+  },
+  "keywords": [
+    "aeblekage",
+    "language",
+    "compiler"
+  ],
+  "author": "Frederik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fmma/aeblekage-language/issues"
+  },
+  "homepage": "https://github.com/fmma/aeblekage-language#readme"
+}
