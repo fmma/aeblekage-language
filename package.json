@@ -15,6 +15,7 @@
     "language",
     "compiler"
   ],
+  "type": "module",
   "author": "Frederik",
   "license": "ISC",
   "bugs": {
