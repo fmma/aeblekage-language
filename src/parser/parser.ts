@@ -1,5 +1,5 @@
 
-class Parser<A> {
+export class Parser<A> {
     constructor(readonly run: (cs: string) => [A, number] | undefined) {
 
     }
