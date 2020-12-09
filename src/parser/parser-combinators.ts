@@ -46,12 +46,30 @@ export class Parser<A> {
         });
     }
 
+    pre<B>(p: Parser<B>): Parser<B> {
+        return this.bind(_ => p);
+    }
+
+    post<B>(p: Parser<B>): Parser<A> {
+        return this.bind(x => p.map(_ => x));
+    }
+
     choice(p2: Parser<A>): Parser<A> {
         return new Parser(cs => this.run(cs) ?? p2.run(cs));
     }
 
     many(): Parser<A[]> {
-        return this.many1().choice(Parser.pure([]));
+        return new Parser(cs => {
+            const ret = [[], 0] as [A[], number];
+            while (true) {
+                const r = this.run(cs.substring(ret[1]));
+                if (r == null)
+                    break;
+                ret[0].push(r[0]);
+                ret[1] += r[1];
+            }
+            return ret;
+        });
     }
 
     many1(): Parser<A[]> {
@@ -74,8 +92,3 @@ export class Parser<A> {
         return ps.reduce((p1, p2) => p1.choice(p2));
     }
 }
-
-console.log(Parser.sat(/b/).choice(Parser.sat(/a/)).many1().run("aabbaaba".repeat(100)));
-
-// Parser.sat = memoize(Parser.sat);
-// Parser.pure = memoize(Parser.pure, JSON.stringify);

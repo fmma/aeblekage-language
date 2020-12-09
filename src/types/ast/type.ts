@@ -1,4 +1,8 @@
+import { Parser } from "../../parser/parser-combinators";
 import { Ast } from "../ast";
+import { Tapp } from "./type/app";
+import { Tfun } from "./type/fun";
+import { Tvar } from "./type/var";
 
 // t ::= a | t t | t -> t
 

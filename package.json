@@ -2,9 +2,10 @@
   "name": "aeblekage-language",
   "version": "0.0.1",
   "description": "The æblekage programming language.",
-  "main": "index.js",
+  "main": "bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && rollup -c rollup.config.lib.js && rollup -c rollup.config.cli.js",
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
@@ -15,11 +16,14 @@
     "language",
     "compiler"
   ],
-  "type": "module",
   "author": "Frederik",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/fmma/aeblekage-language/issues"
   },
-  "homepage": "https://github.com/fmma/aeblekage-language#readme"
+  "homepage": "https://github.com/fmma/aeblekage-language#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.11",
+    "rollup": "^2.34.2"
+  }
 }
