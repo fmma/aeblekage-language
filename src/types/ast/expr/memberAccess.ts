@@ -9,6 +9,6 @@ export class EmemberAccess extends Expr {
     }
 
     show(indent: number, precedence: number) {
-        return this.parenthesis(`${this.e.show(indent, 103)}.${this.x}`, precedence >= 104);
+        return this.parenthesis(`${this.e.show(indent, 1003)}.${this.x}`, precedence >= 1004);
     }
 }

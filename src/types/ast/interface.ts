@@ -13,11 +13,11 @@ export class Interface extends Ast {
         super();
     }
 
-    show() {
+    show(indent: number) {
         return [
-            ...this.imports.map(i => i.show() + '\n'),
-            `interface ${[this.name, ...this.params].join(' ')}`,
-            ...this.members.map(m => m.show(2))
+            ...this.imports.map(i => i.show(indent)),
+            this.indentedLine(indent, `interface ${[this.name, ...this.params].join(' ')}`),
+            ...this.members.map(m => m.show(indent + 2))
         ].join('');
     }
 }

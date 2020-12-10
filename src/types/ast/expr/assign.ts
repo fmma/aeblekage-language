@@ -8,7 +8,8 @@ export class Eassign extends Expr {
         super();
     }
 
-    show() {
-        return `${this.varName} = ${this.e.show()}`;
+
+    show(indent: number, precedence: number) {
+        return this.parenthesis(`${this.varName} = ${this.e.show(indent + 2, 2)}`, precedence >= 3);
     }
 }

@@ -9,6 +9,6 @@ export class Elambda extends Expr {
     }
 
     show(indent: number, precedence: number) {
-        return this.parenthesis(`${this.x} => ${this.e.show(indent + 2, 0)}`, precedence >= 1);
+        return this.parenthesis(`${this.x} => ${this.e.show(indent + 2, 4)}`, precedence >= 5);
     }
 }

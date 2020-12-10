@@ -2,13 +2,12 @@ import { Ast } from "../ast";
 
 export class Import extends Ast {
     constructor(
-        readonly path: string[],
-        readonly name: string
+        readonly path: string[]
     ) {
         super();
     }
 
-    show() {
-        return [...this.path, this.name].join('.')
+    show(indent: number) {
+        return this.indentedLine(indent, 'import ' + this.path.join('.'));
     }
 }

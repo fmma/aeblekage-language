@@ -1,6 +1,14 @@
-import { typeParser } from "../parser/typeParser";
+import { promises } from 'fs';
+import { astInterfaceParser } from '../parser/astParser';
+import { sanitizeSrc } from '../parser/indentTokenizer';
 
-const args = process.argv.slice(2);
-const input = args[0];
-if(input != null)
-    console.log(typeParser.run(input)?.[0].show());
+(async () => {
+    const args = process.argv.slice(2);
+    let input = await promises.readFile(args[0], "utf8");
+    console.log("input");
+    console.log('--');
+    input = sanitizeSrc(input)
+    console.log("input");
+    astInterfaceParser.run(input)?.[0].show(2);
+    console.log("DONE");
+})();

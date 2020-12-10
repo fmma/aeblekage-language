@@ -16,10 +16,10 @@ export class Class extends Ast {
         super();
     }
 
-    show() {
+    show(indent: number) {
         return [
-            ...this.imports.map(i => i.show() + '\n'),
-            `class ${[this.name, ...this.params].join(' ')} : ${[this.interfaceName, ...this.interfaceParams].join(' ')}`,
+            ...this.imports.map(i => i.show(indent)),
+            this.indentedLine(indent, `class ${[this.name, ...this.params].join(' ')} : ${[this.interfaceName, ...this.interfaceParams].join(' ')}`),
             ...this.memberTypes.map(m => m.show(2)),
             ...this.members.map(m => m.show(2))
         ].join('');

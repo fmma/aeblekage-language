@@ -1,7 +1,11 @@
 const _cache: Record<string, Parser<any>> = {};
 
 export class Parser<A> {
-    constructor(readonly run: (cs: string) => [A, number] | undefined) {
+    run: (cs: string) => [A, number] | undefined;
+    constructor(run: (cs: string) => [A, number] | undefined) {
+        this.run = cs => {
+            return run(cs);
+        };
     }
 
     static pure<A>(x: A): Parser<A> {
@@ -73,19 +77,25 @@ export class Parser<A> {
     }
 
     many1(): Parser<A[]> {
-        return this.bind(x =>
-            this.many().bind(xs =>
-                Parser.pure([x, ...xs])));
+        return this.bind(x => this.many().map(xs => [x, ...xs]));
     }
 
     sepby<B>(psep: Parser<B>): Parser<A[]> {
         return this.sepby1(psep).choice(Parser.pure([]));
     }
 
+    sepby1_<B>(psep: Parser<B>): Parser<[A, [B, A][]]> {
+        return this.bind(x =>
+            psep.bind(sep => this.map(x => [sep, x] as [B, A]))
+                .many()
+                .map(xs => [x, xs]));
+    }
+
     sepby1<B>(psep: Parser<B>): Parser<A[]> {
         return this.bind(x =>
-            psep.bind(_ => this).many().bind(xs =>
-                Parser.pure([x, ...xs])));
+            psep.bind(_ => this)
+                .many()
+                .map(xs => [x, ...xs]));
     }
 
     static choices<A>(...ps: Parser<A>[]): Parser<A> {
