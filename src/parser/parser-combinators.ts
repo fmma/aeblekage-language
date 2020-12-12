@@ -1,5 +1,8 @@
 const _cache: Record<string, Parser<any>> = {};
 
+type ParserParam<T> = T extends Parser<infer U> ? U : T;
+type ParserTupleParams<T> = { [P in keyof T]: ParserParam<T[P]> };
+
 export class Parser<A> {
     run: (cs: string) => [A, number] | undefined;
     constructor(run: (cs: string) => [A, number] | undefined) {
@@ -24,6 +27,20 @@ export class Parser<A> {
 
     static empty<A>(): Parser<A> {
         return _cache['empty'] ?? (_cache['empty'] = new Parser(_ => undefined));
+    }
+
+    static do<T extends Parser<any>[]>(...ps: T): Parser<ParserTupleParams<T>> {
+        return new Parser(cs => {
+            let ret = [[], 0] as [any[], number];
+            for (let p of ps) {
+                const r = p.run(cs.substring(ret[1]));
+                if (r == null)
+                    return undefined;
+                ret[0].push(r[0]);
+                ret[1] += r[1];
+            }
+            return ret as any;
+        })
     }
 
     map<A, B>(this: Parser<A>, f: (x: A) => B): Parser<B> {
@@ -60,6 +77,15 @@ export class Parser<A> {
 
     choice(p2: Parser<A>): Parser<A> {
         return new Parser(cs => this.run(cs) ?? p2.run(cs));
+    }
+
+    disjointChoice<B>(p2: Parser<B>): Parser<A | B> {
+        return new Parser(cs => {
+            const r = this.run(cs);
+            if (r == null)
+                return p2.run(cs);
+            return r as [A | B, number];
+        });
     }
 
     many(): Parser<A[]> {

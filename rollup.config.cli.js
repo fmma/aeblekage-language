@@ -3,5 +3,6 @@ export default {
     output: {
         file: 'cli.js',
         format: 'cjs'
-    }
+    },
+    external: [ 'fs', 'path' ]
 };

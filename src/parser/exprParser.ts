@@ -1,7 +1,6 @@
 import { BinopPrecedenceHierarchy, binopPrecedenceHierarchy } from "../binops";
 import { Expr } from "../types/ast/expr";
 import { Eapp } from "../types/ast/expr/app";
-import { Eassign } from "../types/ast/expr/assign";
 import { Ebinop } from "../types/ast/expr/binop";
 import { Elambda } from "../types/ast/expr/lambda";
 import { EmemberAccess } from "../types/ast/expr/memberAccess";
@@ -41,7 +40,6 @@ export const exprBinopParser = generateExprBinopParser(binopPrecedenceHierarchy)
 export const exprParser: Parser<Expr>
     = Parser.choices(
         parseIdent.bind(x => Parser.sat(/^=> */).pre(exprParser.map(e => new Elambda(x, e)))),
-        parseIdent.bind(x => Parser.sat(/^= */).pre(exprParser.map(e => new Eassign(x, e)))),
         exprBinopParser
     );
 

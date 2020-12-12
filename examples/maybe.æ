@@ -1,0 +1,4 @@
+interface Maybe a
+    maybe b: b -> (a -> b) -> b
+    copy: Maybe a
+    orElse: Maybe a -> Maybe a

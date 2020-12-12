@@ -1,4 +1,6 @@
+import { Env } from "../../typing/env";
 import { Ast } from "../ast";
+import { Type } from "./type";
 
 // e ::= x | e e | e <binop> e | e.x | x => e | e; e | x = e | <number> | <string>
 
@@ -15,6 +17,7 @@ import { Ast } from "../ast";
 // lambda: 5 => 4    parens when >= 5   x=>y=>e   (x=>e1)=>e2
 // assign: 3 = 2     parens when >= 3   x = y = 0 (x = y) = 0 x = (y => 0)
 
-export class Expr extends Ast {
-
+export abstract class Expr extends Ast {
+    // G, e |- t
+    abstract typeInf(env: Env): Type;
 }

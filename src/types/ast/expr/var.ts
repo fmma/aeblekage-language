@@ -1,4 +1,6 @@
+import { Env } from "../../../typing/env";
 import { Expr } from "../expr";
+import { Type } from "../type";
 
 export class Evar extends Expr {
     constructor(
@@ -9,5 +11,9 @@ export class Evar extends Expr {
 
     show() {
         return this.name;
+    }
+
+    typeInf(env: Env): Type {
+        return env.get(this.name);
     }
 }

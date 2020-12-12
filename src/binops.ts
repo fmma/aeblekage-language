@@ -1,11 +1,22 @@
+import { polytypeParser } from "./parser/typeParser";
+import { Polytype } from "./typing/polytype";
+
 export class Binop {
+
+    type: Polytype;
+
     constructor(
         readonly symbol: string,
         readonly leftSubPrecedence: number,
         readonly rightSubPrecedence: number,
-        readonly precedence: number
+        readonly precedence: number,
+        type: string
     ) {
         this.regexp = new RegExp(`^${escapeRegExp(symbol)}\\ *`);
+        const parsedType = polytypeParser.run(type);
+        if (parsedType == null)
+            throw new Error('Binop type parser failed');
+        this.type = parsedType[0];
     }
 
     regexp: RegExp;
@@ -25,21 +36,20 @@ export class BinopPrecedenceHierarchy {
 }
 
 export const binops = [
-    new Binop('||', 102, 103, 103),
-    new Binop('&&', 104, 105, 105),
-    new Binop('==', 106, 107, 107),
-    new Binop('>=', 106, 107, 107),
-    new Binop('<=', 106, 107, 107),
-    new Binop('>', 106, 107, 107),
-    new Binop('<', 106, 107, 107),
-    new Binop('+', 108, 109, 109),
-    new Binop('-', 108, 109, 109),
-    new Binop('*', 110, 111, 111),
-    new Binop('/', 110, 111, 111)
+    new Binop('||', 102, 103, 103, 'forall. bool -> bool -> bool'),
+    new Binop('&&', 104, 105, 105, 'forall. bool -> bool -> bool'),
+    new Binop('==', 106, 107, 107, 'forall a. a -> a -> a'),
+    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> a'),
+    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> a'),
+    new Binop('>', 106, 107, 107, 'forall a. a -> a -> a'),
+    new Binop('<', 106, 107, 107, 'forall a. a -> a -> a'),
+    new Binop('+', 108, 109, 109, 'forall. number -> number -> number'),
+    new Binop('-', 108, 109, 109, 'forall. number -> number -> number'),
+    new Binop('*', 110, 111, 111, 'forall. number -> number -> number'),
+    new Binop('/', 110, 111, 111, 'forall. number -> number -> number')
 ]
 
 export const binopPrecedenceHierarchy: BinopPrecedenceHierarchy = initializePrecedenceBinopHierarchy();
-
 
 export function initializePrecedenceBinopHierarchy(): BinopPrecedenceHierarchy {
     const binopsPrecedenceGroups = new Map<number, Binop[]>();

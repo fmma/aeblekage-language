@@ -1,0 +1,13 @@
+import examples.maybe
+
+class Just a : Maybe a
+    value: a
+
+    maybe x f
+        f value
+
+    copy
+        super.copy
+
+    orElse x
+        super

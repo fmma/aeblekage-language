@@ -39,6 +39,7 @@ function sanitizeLine(stack: (number | string)[], line: string): string[] {
         while (stack[stack.length - 1] > leadingSpaces) {
             stack.pop();
             result.push(DEDENT);
+            result.push(NEWLINE);
         }
     }
     for (let i = 0; i < line.length; ++i) {
