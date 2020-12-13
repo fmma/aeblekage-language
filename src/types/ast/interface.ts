@@ -17,6 +17,8 @@ export class Interface extends Ast {
         this.types = {};
         this.members.forEach(x => {
             const mt = x as MemberType;
+            if (this.types[x.name])
+                throw new Error(`Redefinition of ${x.name} in interface ${name}.`);
             this.types[x.name] = mt;
         });
     }
@@ -24,7 +26,7 @@ export class Interface extends Ast {
     types: Record<string, MemberType>;
 
     thisEnv(): Env {
-        const env = new Env({}, { });
+        const env = new Env({}, {});
         this.members.forEach(x => {
             const mt = x as MemberType;
             env.env[x.name] = mt.polytype();

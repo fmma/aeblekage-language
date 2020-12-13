@@ -37,6 +37,12 @@ export async function requireAndTypeCheck(path: string) {
         cl = cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)));
         iface = iface.instantiate(cl.interfaceParams);
 
+        Object.keys(cl.types).forEach(k => {
+            if (iface.types[k]) {
+                throw new Error(`Redefinition of type ${k} from interface ${iface.name} in class ${cl.name} is not allowed.`);
+            }
+        });
+
         console.log(iface.show(0));
         console.log(cl.show(0));
 

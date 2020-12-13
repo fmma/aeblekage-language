@@ -34,11 +34,18 @@ export class Class extends Ast {
         this.constructorArgTypes = [];
         members
             .filter(x => x instanceof Member)
-            .forEach(x => this.defs[x.name] = x as Member);
+            .forEach(x => {
+                const m = x as Member
+                if (this.defs[x.name])
+                    throw new Error(`Redefinition of ${m.name} in class ${name}.`);
+                this.defs[x.name] = m;
+            });
         members
             .filter(x => x instanceof MemberType)
             .forEach(x => {
                 const mt = x as MemberType;
+                if (this.types[x.name])
+                    throw new Error(`Redefinition of type ${mt.name} in class ${name}.`);
                 this.types[x.name] = mt;
                 if (!this.defs[x.name]) {
                     if (mt.params.length > 0)
