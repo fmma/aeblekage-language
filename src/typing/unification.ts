@@ -1,77 +1,64 @@
 import { Type } from "../types/ast/type";
-import { Tapp } from "../types/ast/type/app";
-import { Tfun } from "../types/ast/type/fun";
-import { Tsymbol } from "../types/ast/type/symbol";
-import { Tvar } from "../types/ast/type/var";
 import { resetFresh } from "./fresh";
 import { Substitution } from "./substitution";
 
-let globalSubst = new Substitution({});
-let delayedUnifications = [] as [Type, (t0: Type) => void][];
+const _debugUnify = false;
 
-
-export function delayUnify(t: Type, f: (t0: Type) => void) {
-    delayedUnifications.push([t, f]);
-}
-
-export function beginUnification<T>(runner: () => T): [T, Substitution] {
-
+export class Unification {
     globalSubst = new Substitution({});
-    delayedUnifications = [];
-    resetFresh();
+    delayedUnifications = [] as [Type, (t0: Type) => void][];
 
-    const t = runner();
-
-    while (delayedUnifications.length > 0) {
-        const [t, f] = delayedUnifications.pop() as [Type, (t0: Type) => void];
-        f(t.substitute(globalSubst));
+    constructor() {
+        resetFresh();
     }
 
-    return [t, globalSubst];
-}
-
-const _debugUnify = true;
-
-export function unify(t1: Type, t2: Type) {
-    if(_debugUnify) {
-        console.log(t1.show(), '=', t2.show());
+    delayUnify(t: Type, f: (t0: Type) => void) {
+        this.delayedUnifications.push([t, f]);
     }
-    if (t1 instanceof Tvar) {
 
-        if (_debugUnify) {
-            console.log('!!');
-            console.log(globalSubst.show());
+    end() {
+        while (this.delayedUnifications.length > 0) {
+            const [t, f] = this.delayedUnifications.pop() as [Type, (t0: Type) => void];
+            f(t.substitute(this.globalSubst));
         }
-        if (t2.freeVars().indexOf(t1.name) !== -1)
-            throw new Error(`Occurs check ${t1.name} occurs in ` + t2.show());
-        const t3 = globalSubst.subst[t1.name];
+    }
+
+    unify(t1: Type, t2: Type): void {
+        const ut1 = t1.unificationType;
+        const ut2 = t2.unificationType;
+        if (_debugUnify) {
+            console.log(t1.show(), '=', t2.show());
+        }
+        if (ut1.type === 'var') {
+            return this.unifyVar(ut1.value, t2);
+        }
+        if (ut2.type === 'var') {
+            return this.unify(t2, t1);
+        }
+        if (ut1.name === ut2.name && ut1.args.length === ut2.args.length) {
+            return this.unifyList(ut1.args, ut2.args)
+        }
+        throw this.unificationError(t1, t2);
+    }
+
+    unifyList(ts1: Type[], ts2: Type[]): void {
+        for (let i = 0; i < ts1.length; ++i) {
+            this.unify(ts1[i], ts2[i]);
+        }
+    }
+
+    unifyVar(x: string, t2: Type) {
+        if (t2.freeVars().indexOf(x) !== -1)
+            throw new Error(`Occurs check ${x} occurs in ` + t2.show());
+        const t3 = this.globalSubst.subst[x];
         if (t3 != null) {
-            unify(t3, t2);
+            this.unify(t3, t2);
         }
-        globalSubst = globalSubst.substitute(new Substitution({ [t1.name]: t2 }));
-        globalSubst.subst[t1.name] = t2;
-        if (_debugUnify) {
-            console.log('->');
-            console.log(globalSubst.show());
-        }
-        return;
+        this.globalSubst = this.globalSubst.substitute(new Substitution({ [x]: t2 }));
+        this.globalSubst.subst[x] = t2;
     }
-    if (t2 instanceof Tvar) {
-        unify(t2, t1);
-        return;
-    }
-    if (t1 instanceof Tsymbol && t2 instanceof Tsymbol && t1.name === t2.name) {
-        return;
-    }
-    if (t1 instanceof Tapp && t2 instanceof Tapp ||
-        t1 instanceof Tfun && t2 instanceof Tfun) {
-        unify(t1.t1, t2.t1);
-        unify(t1.t2, t2.t2);
-        return;
-    }
-    throw unificationError(t1, t2);
-}
 
-function unificationError(t1: Type, t2: Type): Error {
-    return new Error(`Unification error ${t1.show()} = ${t2.show()}`);
+    unificationError(t1: Type, t2: Type): Error {
+        return new Error(`Unification error ${t1.show()} = ${t2.show()}`);
+    }
 }

@@ -1,6 +1,7 @@
 import { fresh } from "../../../typing/fresh";
 import { Substitution } from "../../../typing/substitution";
 import { Type } from "../type";
+import { Tsymbol } from "./symbol";
 
 export class Tvar extends Type {
     constructor(
@@ -11,6 +12,10 @@ export class Tvar extends Type {
 
     static fresh() {
         return new Tvar(fresh());
+    }
+
+    static arbitrary() {
+        return new Tsymbol(fresh());
     }
 
     show() {
@@ -24,4 +29,9 @@ export class Tvar extends Type {
     freeVars(): string[] {
         return [this.name];
     }
+
+    unificationType = {
+        type: 'var' as const,
+        value: this.name
+    };
 }

@@ -1,8 +1,6 @@
-import { Env } from "../../typing/env";
 import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
 import { Ast } from "../ast";
-import { Interface } from "./interface";
 import { Import } from "./import";
 import { Member } from "./member";
 import { MemberType } from "./memberType";
@@ -73,20 +71,15 @@ export class Class extends Ast {
     defs: Record<string, Member>;
     types: Record<string, MemberType>;
 
-    thisEnv(imports: (Class | Interface)[]): Env {
-        const env = new Env({}, {});
-        imports.forEach(i => {
-            if (i instanceof Interface) {
-                env.ifaces[i.name] = i;
-            }
-        })
+    thisEnv(): Record<string, Polytype | undefined> {
+        const env = {} as Record<string, Polytype | undefined>;
         this.members
             .filter(x => x instanceof MemberType)
             .forEach(x => {
                 const mt = x as MemberType;
-                env.env[x.name] = mt.polytype();
+                env[x.name] = mt.polytype();
             });
-        env.env[this.name] = this.specialTypes.constructorType;
+        env[this.name] = this.specialTypes.constructorType;
         return env;
     }
     constructorArgTypes: Type[];

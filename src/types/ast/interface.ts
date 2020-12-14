@@ -1,4 +1,4 @@
-import { Env } from "../../typing/env";
+import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
 import { Ast } from "../ast";
 import { Import } from "./import";
@@ -25,11 +25,11 @@ export class Interface extends Ast {
 
     types: Record<string, MemberType>;
 
-    thisEnv(): Env {
-        const env = new Env({}, {});
+    thisEnv(): Record<string, Polytype | undefined> {
+        const env = {} as Record<string, Polytype | undefined>;
         this.members.forEach(x => {
             const mt = x as MemberType;
-            env.env[x.name] = mt.polytype();
+            env[x.name] = mt.polytype();
         });
         return env;
     }

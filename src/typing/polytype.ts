@@ -15,12 +15,8 @@ export class Polytype implements Substitutable<Polytype>, Instatiable<Type> {
         return this.monotype.substitute(Substitution.fresh(this.params));
     }
 
-    symbolicate() {
-        const st = new Substitution({});
-        this.params.forEach(a => {
-            st.subst[a] = new Tsymbol(`$${a}`);
-        });
-        return this.monotype.substitute(st);
+    instantiateArbitrary() {
+        return this.monotype.substitute(Substitution.arbitrary(this.params));
     }
 
     substitute(subst: Substitution): Polytype {

@@ -1,13 +1,8 @@
-import { Instatiable } from "../../typing/instatiable";
 import { Polytype } from "../../typing/polytype";
 import { Substitutable } from "../../typing/substitutable";
 import { Substitution } from "../../typing/substitution";
 import { Ast } from "../ast";
 import { Type } from "./type";
-import { Tapp } from "./type/app";
-import { Tfun } from "./type/fun";
-import { Tsymbol } from "./type/symbol";
-import { Tvar } from "./type/var";
 
 export class MemberType extends Ast implements Substitutable<MemberType> {
     constructor(

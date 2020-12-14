@@ -20,4 +20,10 @@ export class Tfun extends Type {
     freeVars(): string[] {
         return [...new Set([...this.t1.freeVars(), ...this.t2.freeVars()])];
     }
+
+    unificationType = {
+        type: 'cstr' as const,
+        name: '->',
+        args: [this.t1, this.t2]
+    };
 }

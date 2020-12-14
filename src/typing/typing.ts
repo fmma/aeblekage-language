@@ -3,7 +3,9 @@ import { Class } from "../types/ast/class";
 import { Import } from "../types/ast/import";
 import { Interface } from "../types/ast/interface";
 import { Tsymbol } from "../types/ast/type/symbol";
-import { beginUnification, unify } from "./unification";
+import { Env } from "./env";
+import { Polytype } from "./polytype";
+import { Unification } from "./unification";
 
 export async function loadImport(i: Import): Promise<Interface | Class> {
     return await requireImport(i.path);
@@ -21,8 +23,15 @@ export async function requireAndTypeCheck(path: string) {
     if (ifaceOrClass instanceof Class) {
         let cl = ifaceOrClass;
         const imports = await Promise.all(cl.imports.map(loadImport));
+        const ifacesObj = {} as Record<string, Interface | undefined>;
+        imports.forEach(i => {
+            if (i instanceof Interface) {
+                ifacesObj[i.name] = i;
+            }
+        });
 
         const ifaces = imports.filter(i => i.name === cl.interfaceName);
+
         if (ifaces.length === 0)
             throw new Error(`Could not find interface ${cl.interfaceName} in imports.`);
 
@@ -46,9 +55,16 @@ export async function requireAndTypeCheck(path: string) {
         console.log(iface.show(0));
         console.log(cl.show(0));
 
-        const env = iface.thisEnv().concat(cl.thisEnv(imports))
-            .add('this', cl.specialTypes.thisType)
-            .add('super', cl.specialTypes.superType);
+        const env = new Env(
+            {
+                ...iface.thisEnv(),
+                ...cl.thisEnv(),
+                'this': new Polytype([], cl.specialTypes.superType),
+                'this_': new Polytype([], cl.specialTypes.thisType)
+            },
+            ifacesObj,
+            new Unification()
+        );
         console.log('ENV:');
         console.log(env.show());
 
@@ -63,16 +79,13 @@ export async function requireAndTypeCheck(path: string) {
             console.log('CHECKING ', cl.defs[k].show(0))
             console.log('FOR TYPE ', type.polytype().show());
 
-            const targetType = type.polytype().symbolicate();
+            const targetType = type.polytype().instantiateArbitrary();
 
-            const [[t1, t2], g] = beginUnification(() => {
-                const inferredType = cl.defs[k].typeInf(env);
-                unify(inferredType, targetType);
-                return [inferredType, targetType];
-            });
-
-            console.log(`OK ${t1.show()} === ${t2.show()} in:`);
-            console.log(g.show());
+            const inferredType = cl.defs[k].typeInf(env);
+            env.unification.unify(inferredType, targetType);
+            env.unification.end();
+            console.log(`OK ${inferredType.show()} === ${targetType.show()} in:`);
+            console.log(env.unification.globalSubst.show());
         });
     }
     return 0;

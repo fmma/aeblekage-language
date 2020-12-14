@@ -4,8 +4,5 @@ class Nothing a : Maybe a
     maybe x f
         x
 
-    copy
-        Nothing
-
     orElse x
         x

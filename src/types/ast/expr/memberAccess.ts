@@ -1,5 +1,4 @@
 import { Env } from "../../../typing/env";
-import { delayUnify, unify } from "../../../typing/unification";
 import { Expr } from "../expr";
 import { Type } from "../type";
 import { Tapp } from "../type/app";
@@ -21,13 +20,12 @@ export class EmemberAccess extends Expr {
     typeInf(env: Env): Type {
         const t = this.e.typeInf(env);
         const tx = Tvar.fresh();
-        delayUnify(t, instanceType => {
+        env.unification.delayUnify(t, instanceType => {
             const [f, ts] = matchInterfaceType(instanceType);
             const iface = env.ifaces[f]?.instantiate(ts);
             if (iface == null)
                 throw new Error(`Could not find interface ${f}.`);
-            unify(iface.types[this.x].polytype().instantiate(), tx);
-
+            env.unification.unify(iface.types[this.x].polytype().instantiate(), tx);
         });
         return tx;
     }

@@ -1,4 +1,3 @@
-
 let _fresh = 0;
 
 export function fresh(): string {

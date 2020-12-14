@@ -1,5 +1,5 @@
 import { Substitution } from "../../../typing/substitution";
-import { Type } from "../type";
+import { Type, UnificationType } from "../type";
 
 export class Tapp extends Type {
     constructor(
@@ -23,4 +23,11 @@ export class Tapp extends Type {
     freeVars(): string[] {
         return [...new Set([...this.t1.freeVars(), ...this.t2.freeVars()])];
     }
+
+    unificationType = {
+        type: 'cstr' as const,
+        name: '@',
+        args: [this.t1, this.t2]
+    };
+
 }

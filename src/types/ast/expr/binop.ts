@@ -1,6 +1,5 @@
 import { Binop } from "../../../binops";
 import { Env } from "../../../typing/env";
-import { unify } from "../../../typing/unification";
 import { Expr } from "../expr";
 import { Type } from "../type";
 import { Tfun } from "../type/fun";
@@ -28,7 +27,7 @@ export class Ebinop extends Expr {
         const t2 = this.e2.typeInf(env);
         const t3 = this.binop.type.instantiate();
         const tx = Tvar.fresh();
-        unify(t3, new Tfun(t1, new Tfun(t2, tx)));
+        env.unification.unify(t3, new Tfun(t1, new Tfun(t2, tx)));
         return tx;
     }
 }

@@ -6,8 +6,5 @@ class Just a : Maybe a
     maybe x f
         f value
 
-    copy
-        super.copy
-
     orElse x
-        super
+        this

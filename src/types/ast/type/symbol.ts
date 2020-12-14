@@ -19,4 +19,9 @@ export class Tsymbol extends Type {
         return [];
     }
 
+    unificationType = {
+        type: 'cstr' as const,
+        name: this.name,
+        args: []
+    };
 }

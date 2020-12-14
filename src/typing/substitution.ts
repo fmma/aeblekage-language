@@ -1,6 +1,5 @@
 import { Type } from "../types/ast/type";
 import { Tvar } from "../types/ast/type/var";
-import { fresh } from "./fresh";
 import { Substitutable } from "./substitutable";
 
 export class Substitution implements Substitutable<Substitution> {
@@ -13,8 +12,16 @@ export class Substitution implements Substitutable<Substitution> {
     static fresh(params: string[]): Substitution {
         const subst: Record<string, Type | undefined> = {};
         params.forEach(p => {
-            subst[p] = new Tvar(fresh());
-        })
+            subst[p] = Tvar.fresh();
+        });
+        return new Substitution(subst);
+    }
+
+    static arbitrary(params: string[]): Substitution {
+        const subst: Record<string, Type | undefined> = {};
+        params.forEach(p => {
+            subst[p] = Tvar.arbitrary();;
+        });
         return new Substitution(subst);
     }
 
