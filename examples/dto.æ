@@ -1,0 +1,8 @@
+class Dto
+    id: number
+    name: string
+    age: number
+    adress1: string
+    adress2: string
+    datestring: string
+    
