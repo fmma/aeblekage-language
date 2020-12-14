@@ -79,6 +79,10 @@ export class Parser<A> {
         return new Parser(cs => this.run(cs) ?? p2.run(cs));
     }
 
+    optional(): Parser<A | undefined> {
+        return this.disjointChoice(Parser.pure(undefined));
+    }
+
     disjointChoice<B>(p2: Parser<B>): Parser<A | B> {
         return new Parser(cs => {
             const r = this.run(cs);
