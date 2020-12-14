@@ -6,20 +6,20 @@ const _debugUnify = false;
 
 export class Unification {
     globalSubst = new Substitution({});
-    delayedUnifications = [] as [Type, (t0: Type) => void][];
+    delayedUnifications = [] as [Type, (t0: Type) => Promise<void>][];
 
     constructor() {
         resetFresh();
     }
 
-    delayUnify(t: Type, f: (t0: Type) => void) {
+    delayUnify(t: Type, f: (t0: Type) => Promise<void>) {
         this.delayedUnifications.push([t, f]);
     }
 
-    end() {
+    async end() {
         while (this.delayedUnifications.length > 0) {
-            const [t, f] = this.delayedUnifications.pop() as [Type, (t0: Type) => void];
-            f(t.substitute(this.globalSubst));
+            const [t, f] = this.delayedUnifications.pop() as [Type, (t0: Type) => Promise<void>];
+            await f(t.substitute(this.globalSubst));
         }
     }
 

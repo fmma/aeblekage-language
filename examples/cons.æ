@@ -1,0 +1,24 @@
+import examples.list
+import examples.just
+
+class Cons a : List a
+    x : a
+    xs : List a
+
+    fold nil cons
+        cons x xs
+
+    foldr x0 f
+        f x (xs.foldr x0 f)
+
+    head
+        Just x
+
+    append ys
+        Cons x (xs.append ys)
+
+    length
+        1 + xs.length
+
+    map f
+        Cons (f x) (xs.map f)

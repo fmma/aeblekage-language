@@ -2,6 +2,7 @@ import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
 import { Ast } from "../ast";
 import { Import } from "./import";
+import { Interface } from "./interface";
 import { Member } from "./member";
 import { MemberType } from "./memberType";
 import { Type } from "./type";
@@ -70,6 +71,8 @@ export class Class extends Ast {
 
     defs: Record<string, Member>;
     types: Record<string, MemberType>;
+    constructorArgTypes: Type[];
+    specialTypes: ClassTypes;
 
     thisEnv(): Record<string, Polytype | undefined> {
         const env = {} as Record<string, Polytype | undefined>;
@@ -82,8 +85,6 @@ export class Class extends Ast {
         env[this.name] = this.specialTypes.constructorType;
         return env;
     }
-    constructorArgTypes: Type[];
-    specialTypes: ClassTypes;
 
     show(indent: number) {
         return [
@@ -93,7 +94,6 @@ export class Class extends Ast {
         ].join('');
     }
 
-
     freeVars(): string[] {
         return [...new Set([
             ...this.members.flatMap(m => m.freeVars()),
@@ -102,7 +102,7 @@ export class Class extends Ast {
     }
 
 
-    instantiate(ts: Type[]): Class {
+    instantiate(ts: Type[], ifaces: Interface[]): Class {
         if (ts.length !== this.params.length)
             throw new Error(`Paramter count mismatch in instantiation of ${this.name} with (${ts.map(x => x.show()).join(', ')})`);
 
@@ -112,6 +112,9 @@ export class Class extends Ast {
         }
         st.subst[this.name] = new Tsymbol(this.name);
         st.subst[this.interfaceName] = new Tsymbol(this.interfaceName);
+        ifaces.forEach(i => {
+            st.subst[i.name] = new Tsymbol(i.name);
+        });
         return new Class(this.imports,
             this.name,
             [],

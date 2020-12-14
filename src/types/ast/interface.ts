@@ -1,5 +1,6 @@
 import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
+import { loadImport } from "../../typing/typing";
 import { Ast } from "../ast";
 import { Import } from "./import";
 import { MemberType } from "./memberType";
@@ -47,7 +48,7 @@ export class Interface extends Ast {
             .filter(x => [this.name, ...this.params].indexOf(x) === -1);
     }
 
-    instantiate(ts: Type[]): Interface {
+    async instantiate(ts: Type[]): Promise<Interface> {
         if (ts.length !== this.params.length)
             throw new Error(`Paramter count mismatch in instantiation of ${this.name}(${this.params.join(', ')}) with (${ts.map(x => x.show()).join(', ')})`);
 
@@ -55,6 +56,11 @@ export class Interface extends Ast {
         for (let i = 0; i < ts.length; ++i) {
             st.subst[this.params[i]] = ts[i];
         }
+        const imports = await Promise.all(this.imports.map(loadImport));
+        imports.forEach(i => {
+            if (i instanceof Interface)
+                st.subst[i.name] = new Tsymbol(i.name);
+        });
         st.subst[this.name] = new Tsymbol(this.name);
         return new Interface(this.imports, this.name, [], this.members.map(x => x.substitute(st)));
     }

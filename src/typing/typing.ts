@@ -14,79 +14,104 @@ export async function loadImport(i: Import): Promise<Interface | Class> {
 export async function requireAndTypeCheck(path: string) {
     const ifaceOrClass = await requireImport(path.split('.') ?? []);
 
-    if (ifaceOrClass.freeVars().length > 0)
-        throw new Error(`Unbound type variable(s): ${ifaceOrClass.freeVars().join(', ')}.`);
-
     if (ifaceOrClass instanceof Interface) {
         return;
     }
     if (ifaceOrClass instanceof Class) {
-        let cl = ifaceOrClass;
-        const imports = await Promise.all(cl.imports.map(loadImport));
-        const ifacesObj = {} as Record<string, Interface | undefined>;
-        imports.forEach(i => {
-            if (i instanceof Interface) {
-                ifacesObj[i.name] = i;
-            }
-        });
-
-        const ifaces = imports.filter(i => i.name === cl.interfaceName);
-
-        if (ifaces.length === 0)
-            throw new Error(`Could not find interface ${cl.interfaceName} in imports.`);
-
-        if (ifaces.length > 1)
-            throw new Error(`Multiple interfaces of name ${cl.interfaceName} found in imports.`);
-
-        let iface = ifaces[0];
-
-        if (!(iface instanceof Interface))
-            throw new Error(`${cl.interfaceName} was not an interface.`);
-
-        cl = cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)));
-        iface = iface.instantiate(cl.interfaceParams);
-
-        Object.keys(cl.types).forEach(k => {
-            if (iface.types[k]) {
-                throw new Error(`Redefinition of type ${k} from interface ${iface.name} in class ${cl.name} is not allowed.`);
-            }
-        });
-
-        console.log(iface.show(0));
-        console.log(cl.show(0));
-
-        const env = new Env(
-            {
-                ...iface.thisEnv(),
-                ...cl.thisEnv(),
-                'this': new Polytype([], cl.specialTypes.superType),
-                'this_': new Polytype([], cl.specialTypes.thisType)
-            },
-            ifacesObj,
-            new Unification()
-        );
-        console.log('ENV:');
-        console.log(env.show());
-
-        console.log('CHECK:');
-        Object.keys(cl.defs).forEach(k => {
-
-            const type = cl.types[k] ?? iface?.types[k];
-
-            if (type == null)
-                throw new Error(`No type for ${cl.name}.${k}`);
-
-            console.log('CHECKING ', cl.defs[k].show(0))
-            console.log('FOR TYPE ', type.polytype().show());
-
-            const targetType = type.polytype().instantiateArbitrary();
-
-            const inferredType = cl.defs[k].typeInf(env);
-            env.unification.unify(inferredType, targetType);
-            env.unification.end();
-            console.log(`OK ${inferredType.show()} === ${targetType.show()} in:`);
-            console.log(env.unification.globalSubst.show());
-        });
+        await typecheckClass(ifaceOrClass);
     }
     return 0;
+}
+
+function getIfaces(imports: (Class | Interface)[]): Record<string, Interface | undefined> {
+    const ifaces = {} as Record<string, Interface | undefined>;
+    imports.forEach(i => {
+        if (i instanceof Interface) {
+            if (ifaces[i.name])
+                throw new Error(`Multiple interfaces of name ${i.name}`);
+            ifaces[i.name] = i;
+        }
+    });
+    return ifaces;
+}
+
+function getConstructors(imports: (Class | Interface)[]): Record<string, Polytype | undefined> {
+    const cstrs = {} as Record<string, Polytype | undefined>;
+    imports.forEach(i => {
+        if (i instanceof Class) {
+            if (cstrs[i.name])
+                throw new Error(`Multiple constructors of name ${i.name}`);
+            cstrs[i.name] = i.specialTypes.constructorType;
+        }
+    });
+    return cstrs;
+}
+
+async function typecheckClass(cl: Class) {
+    const imports = await Promise.all(cl.imports.map(loadImport));
+    const ifaces = getIfaces(imports);
+    const cstrs = getConstructors(imports);
+    cl = cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)), Object.values(ifaces) as Interface[]);
+
+    if (cl.freeVars().length > 0)
+        throw new Error(`Unbound type variable(s): ${cl.freeVars().join(', ')}.`);
+
+    const iface = await ifaces[cl.interfaceName]?.instantiate(cl.interfaceParams);
+    if (iface == null)
+        throw new Error(`Interface ${cl.interfaceName} not found.`);
+    Object.keys(cl.types).forEach(k => {
+        if (iface.types[k]) {
+            throw new Error(`Redefinition of type ${k} from interface ${iface.name} in class ${cl.name} is not allowed.`);
+        }
+    });
+
+    console.log(iface.show(0));
+    console.log(cl.show(0));
+
+    console.log('CHECK:');
+
+    for (let k of Object.keys(iface.types)) {
+        if (cl.defs[k] == null)
+            throw new Error(`Interface method ${iface.name}.${k} not implemented in ${cl.name}.`);
+    };
+    for (let k of Object.keys(cl.defs)) {
+        await checkMemberDef(k, cl, iface, ifaces, cstrs);
+    };
+    console.log(cl.name, ':', cl.specialTypes.constructorType.show());
+}
+
+async function checkMemberDef(name: string,
+    cl: Class,
+    iface: Interface,
+    ifaces: Record<string, Interface | undefined>,
+    cstrs: Record<string, Polytype | undefined>) {
+    const env = new Env(
+        {
+            ...cstrs,
+            ...iface.thisEnv(),
+            ...cl.thisEnv(),
+            'this': new Polytype([], cl.specialTypes.superType),
+            'this_': new Polytype([], cl.specialTypes.thisType)
+        },
+        ifaces,
+        new Unification()
+    );
+    console.log('ENV:');
+    console.log(env.show());
+
+    const type = cl.types[name] ?? iface?.types[name];
+
+    if (type == null)
+        throw new Error(`No type for ${cl.name}.${name}`);
+
+    console.log('CHECKING ', cl.defs[name].show(0))
+    console.log('FOR TYPE ', type.polytype().show());
+
+    const targetType = type.polytype().instantiateArbitrary();
+
+    const inferredType = cl.defs[name].typeInf(env);
+    env.unification.unify(inferredType, targetType);
+    await env.unification.end();
+    console.log(`OK ${inferredType.show()} === ${targetType.show()} in:`);
+    console.log(env.unification.globalSubst.show());
 }

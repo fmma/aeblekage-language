@@ -20,12 +20,15 @@ export class EmemberAccess extends Expr {
     typeInf(env: Env): Type {
         const t = this.e.typeInf(env);
         const tx = Tvar.fresh();
-        env.unification.delayUnify(t, instanceType => {
+        env.unification.delayUnify(t, async instanceType => {
             const [f, ts] = matchInterfaceType(instanceType);
-            const iface = env.ifaces[f]?.instantiate(ts);
+            const iface = await env.ifaces[f]?.instantiate(ts);
             if (iface == null)
-                throw new Error(`Could not find interface ${f}.`);
-            env.unification.unify(iface.types[this.x].polytype().instantiate(), tx);
+                throw new Error(`Could not find interface ${f} in ${this.show(0, 0)}.`);
+            const mt = iface.types[this.x];
+            if (mt == null)
+                throw new Error(`Interface ${f} does not have a member ${this.x}.`)
+            env.unification.unify(mt.polytype().instantiate(), tx);
         });
         return tx;
     }

@@ -1,0 +1,9 @@
+import examples.maybe
+
+interface List a
+    fold b: b -> (a -> List a -> b) -> b
+    foldr b: b -> (a -> b -> b) -> b
+    head: Maybe a
+    append: List a -> List a
+    length: number
+    map b: (a -> b) -> List b
