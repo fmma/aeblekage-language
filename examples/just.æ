@@ -3,8 +3,8 @@ import examples.maybe
 class Just a : Maybe a
     value: a
 
-    maybe x f
+    maybe x f =
         f value
 
-    orElse x
+    orElse x =
         this

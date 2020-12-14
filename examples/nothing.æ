@@ -1,8 +1,8 @@
 import examples.maybe
 
 class Nothing a : Maybe a
-    maybe x f
+    maybe x f =
         x
 
-    orElse x
+    orElse x =
         x

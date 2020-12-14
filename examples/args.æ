@@ -1,0 +1,15 @@
+import examples.iargs
+
+class Args : Iargs
+    big a b c d e f g :
+        Class a b f
+        Interface c d g
+        Record string (Maybe (Interface c d g))
+        Record string (Maybe Polytype)
+        ()
+
+    big cl iface ifaces cstrs =
+        env = Env 
+            cstrs 
+            iface.thisEnv 
+            cl.thisEnv 

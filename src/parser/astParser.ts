@@ -20,8 +20,11 @@ export const astMemberTypeParser: Parser<MemberType>
 
 export const astMemberParser: Parser<Member>
     = parseIdent.bind(f =>
-        parseIdent.many().bind(as => astExprSequenceParser.map(es =>
-            new Member(f, as, es))));
+        parseIdent.many().bind(as =>
+            Parser.sat(/^= */).pre((
+                exprParser.map(x => new ExprSequence([x]))
+                    .choice(astExprSequenceParser))
+                .map(es => new Member(f, as, es)))));
 
 export const astExprSequenceParser: Parser<ExprSequence>
     = iseq(exprParser).map(es => new ExprSequence(es));
