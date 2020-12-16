@@ -1,7 +1,7 @@
 import examples.list
 import examples.nothing
 
-class Nil a : List a
+type Nil a : List a
     fold nil cons = nil
     foldr x0 f = x0
     head = Nothing

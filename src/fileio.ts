@@ -1,9 +1,9 @@
 import { join } from 'path';
 import { promises, existsSync } from 'fs';
-import { astInterfaceParser, astParser } from "./parser/astParser";
+import { astParser } from "./parser/astParser";
 import { sanitizeSrc } from './parser/indentTokenizer';
-import { Interface } from "./types/ast/interface";
 import { Class } from './types/ast/class';
+import globlib from 'glob';
 
 export const libDirs = ['.'];
 
@@ -16,9 +16,9 @@ export function whereis(path: string): string {
     throw new Error(`Cannot find file ${path}. Searched locations: ${libDirs.join(', ')}`);
 }
 
-const fileCache: Record<string, Interface | Class | undefined> = {};
+const fileCache: Record<string, Class | undefined> = {};
 
-export async function requireImport(path: string[]): Promise<Class | Interface> {
+export async function requireImport(path: string[]): Promise<Class> {
     const joinedPath = path.join('.');
     const cachedValue = fileCache[joinedPath];
     if (cachedValue)
@@ -33,4 +33,16 @@ export async function requireImport(path: string[]): Promise<Class | Interface> 
         throw new Error(`Incomplete parse in ${joinedPath}. Tokens:\n${input.substring(result[1])}`)
     fileCache[joinedPath] = result[0];
     return result[0];
+}
+
+export async function glob(pattern: string[]): Promise<string[]> {
+    const pat = pattern.length <= 1
+        ? pattern[0] ?? ''
+        : `{${pattern.join(',')}}`;
+    return new Promise<string[]>((resolve, reject) => globlib(pat, (err, xs) => {
+        if (err) {
+            return reject(err);
+        }
+        return resolve(xs);
+    }));
 }

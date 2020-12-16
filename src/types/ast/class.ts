@@ -1,8 +1,9 @@
 import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
+import { loadImport } from "../../typing/typing";
 import { Ast } from "../ast";
+import { ClassType } from "./classType";
 import { Import } from "./import";
-import { Interface } from "./interface";
 import { Member } from "./member";
 import { MemberType } from "./memberType";
 import { Type } from "./type";
@@ -22,8 +23,7 @@ export class Class extends Ast {
         readonly imports: Import[],
         readonly name: string,
         readonly params: string[],
-        readonly interfaceName: string,
-        readonly interfaceParams: Type[],
+        readonly iface: ClassType | undefined,
         readonly members: (Member | MemberType)[],
         types?: ClassTypes
     ) {
@@ -46,23 +46,21 @@ export class Class extends Ast {
                 if (this.types[x.name])
                     throw new Error(`Redefinition of type ${mt.name} in class ${name}.`);
                 this.types[x.name] = mt;
-                if (!this.defs[x.name]) {
-                    if (mt.params.length > 0)
-                        throw new Error(`Constructor argument type is too polymorphic:\n${mt.show(0)}`);
-
+                if (!this.defs[x.name])
                     this.constructorArgTypes.push(mt.value);
-                }
             });
 
         if (types == null) {
             const thisType = params.reduce((t, x) => new Tapp(t, new Tvar(x)), new Tsymbol(name) as Type);
-            const superType = this.interfaceParams.reduce((t, a) => new Tapp(t, a), new Tsymbol(interfaceName) as Type);
+            const superType =
+                iface
+                    ? iface.params.reduce((t, a) => new Tapp(t, a), new Tsymbol(iface.name) as Type)
+                    : thisType;
             const constructorType = new Polytype(this.params,
                 this.constructorArgTypes.reduceRight((t2, t1) => new Tfun(t1, t2), superType));
             this.specialTypes = {
                 thisType, superType, constructorType
             }
-
         }
         else {
             this.specialTypes = types;
@@ -89,7 +87,7 @@ export class Class extends Ast {
     show(indent: number) {
         return [
             ...this.imports.map(i => i.show(indent)),
-            this.indentedLine(indent, `class ${[this.name, ...this.params].join(' ')} : ${[this.interfaceName, ...this.interfaceParams.map(t => t.show())].join(' ')}`),
+            this.indentedLine(indent, `class ${[this.name, ...this.params].join(' ')} ${this.iface ? this.iface.show() : ''}`),
             ...this.members.map(m => m.show(2))
         ].join('');
     }
@@ -97,12 +95,13 @@ export class Class extends Ast {
     freeVars(): string[] {
         return [...new Set([
             ...this.members.flatMap(m => m.freeVars()),
-            ...this.interfaceParams.flatMap(a => a.freeVars())
-        ])].filter(x => [this.name, this.interfaceName, ...this.params].indexOf(x) === -1);
+            ...this.iface?.freeVars() ?? []
+        ])].filter(x => [this.name, this.iface?.name ?? '', ...this.params].indexOf(x) === -1);
     }
 
 
-    instantiate(ts: Type[], ifaces: Interface[]): Class {
+    async instantiate(ts: Type[]): Promise<Class> {
+        const imports = await Promise.all(this.imports.map(loadImport));
         if (ts.length !== this.params.length)
             throw new Error(`Paramter count mismatch in instantiation of ${this.name} with (${ts.map(x => x.show()).join(', ')})`);
 
@@ -111,15 +110,15 @@ export class Class extends Ast {
             st.subst[this.params[i]] = ts[i];
         }
         st.subst[this.name] = new Tsymbol(this.name);
-        st.subst[this.interfaceName] = new Tsymbol(this.interfaceName);
-        ifaces.forEach(i => {
+        if (this.iface)
+            st.subst[this.iface.name] = new Tsymbol(this.iface.name);
+        imports.forEach(i => {
             st.subst[i.name] = new Tsymbol(i.name);
         });
         return new Class(this.imports,
             this.name,
             [],
-            this.interfaceName,
-            this.interfaceParams.map(t => t.substitute(st)),
+            this.iface?.substitute(st),
             this.members.map(x => x.substitute(st)),
             {
                 constructorType: this.specialTypes.constructorType,

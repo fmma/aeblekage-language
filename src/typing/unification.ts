@@ -48,12 +48,16 @@ export class Unification {
     }
 
     unifyVar(x: string, t2: Type) {
+        if (t2.unificationType.type === 'var' && x === t2.unificationType.value)
+            return;
+
         if (t2.freeVars().indexOf(x) !== -1)
             throw new Error(`Occurs check ${x} occurs in ` + t2.show());
+
         const t3 = this.globalSubst.subst[x];
-        if (t3 != null) {
+        if (t3 != null)
             this.unify(t3, t2);
-        }
+
         this.globalSubst = this.globalSubst.substitute(new Substitution({ [x]: t2 }));
         this.globalSubst.subst[x] = t2;
     }

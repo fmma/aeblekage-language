@@ -1,7 +1,7 @@
 import examples.list
 import examples.just
 
-class Cons a : List a
+type Cons a : List a
     x : a
     xs : List a
 

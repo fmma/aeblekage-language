@@ -1,8 +1,19 @@
-class Dto
+type Dto a
     id: number
     name: string
     age: number
     adress1: string
     adress2: string
     datestring: string
-    
+    phone: string
+    mobile: string
+    haircolor: string
+    height: number
+    item1: a
+    item2: a
+    item4: a
+    item5: a
+    item6: a
+
+    map b: (a -> b) -> Dto b
+    map f = Dto id name age adress1 adress2 datestring phone mobile haircolor height (f item1) (f item2) (f item4) (f item5) (f item6)

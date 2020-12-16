@@ -22,7 +22,7 @@ export class EmemberAccess extends Expr {
         const tx = Tvar.fresh();
         env.unification.delayUnify(t, async instanceType => {
             const [f, ts] = matchInterfaceType(instanceType);
-            const iface = await env.ifaces[f]?.instantiate(ts);
+            const iface = await env.imports[f]?.instantiate(ts);
             if (iface == null)
                 throw new Error(`Could not find interface ${f} in ${this.show(0, 0)}.`);
             const mt = iface.types[this.x];

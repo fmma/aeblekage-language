@@ -1,0 +1,41 @@
+type Stmt
+    foo: number
+    foo =
+        e
+        x = e
+        x =
+            e1
+            ..
+
+        // app
+        e
+            e1
+            ..
+
+        // chaining not good
+        ((e.x1 e1).x2 e2).x3 e3
+        e
+            .x1 e1
+            .x2 e2
+            .x3 e3
+
+        // lambda
+        f x =
+            e1
+            ..
+
+        // dto constructor
+        e
+            x1 = e1
+            x2 = e2
+            ..
+        
+        (xs.where (x => ..)).select (x => ..) // :(
+        xs
+            .where x => ..
+            .select x => Dto
+                id = x.id
+                name = x.name
+                ...
+        
+e1 e2

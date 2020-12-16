@@ -1,6 +1,6 @@
 import examples.maybe
 
-class Just a : Maybe a
+type Just a : Maybe a
     value: a
 
     maybe x f = f value

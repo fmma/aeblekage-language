@@ -1,4 +1,9 @@
-interface Maybe a
+import examples.nothing
+
+type Maybe a
     maybe b: b -> (a -> b) -> b
-    copy: Maybe a
     orElse: Maybe a -> Maybe a
+    bind b:
+        a -> Maybe b
+        Maybe b
+    bind f = maybe Nothing f

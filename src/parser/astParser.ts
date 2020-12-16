@@ -1,7 +1,7 @@
 import { Class } from "../types/ast/class";
+import { ClassType } from "../types/ast/classType";
 import { ExprSequence } from "../types/ast/exprSequence";
 import { Import } from "../types/ast/import";
-import { Interface } from "../types/ast/interface";
 import { Member } from "../types/ast/member";
 import { MemberType } from "../types/ast/memberType";
 import { Type } from "../types/ast/type";
@@ -34,28 +34,24 @@ export const astExprSequenceParser: Parser<ExprSequence>
 export const astTypeSequenceParser: Parser<Type>
     = iseq(typeParser).map(ts => ts.reduceRight((t2, t1) => new Tfun(t1, t2)));
 
-export const astInterfaceParser: Parser<Interface>
+export const astParserClassInterface: Parser<ClassType | undefined>
     = Parser.do(
-        astImportParser.post(parseNewline).many(),
-        Parser.sat(/^interface  */),
+        Parser.sat(/^: */),
         parseIdent,
-        parseIdent.many(),
-        iseq(astMemberTypeParser)
-    ).map(([is, _2, f, as, ms]) => new Interface(is, f, as, ms));
+        typeParser.many()
+    ).map(([_, f, as]) => new ClassType(f, as)).optional();
 
 export const astClassParser: Parser<Class>
     = Parser.do(
         astImportParser.post(parseNewline).many(),
-        Parser.sat(/^class  */),
+        Parser.sat(/^type  */),
         parseIdent,
         parseIdent.many(),
-        Parser.sat(/^: */),
-        parseIdent,
-        typeParser.many(),
+        astParserClassInterface,
         iseq(astMemberTypeParser.disjointChoice(astMemberParser)),
-    ).map(([is, _2, f, as, _3, g, bs, ms]) => new Class(is, f, as, g, bs, ms));
+    ).map(([is, _2, f, as, iface, ms]) => new Class(is, f, as, iface, ms));
 
-export const astParser = Parser.sat(/\s*/).pre(astInterfaceParser.disjointChoice(astClassParser));
+export const astParser = Parser.sat(/\s*/).pre(astClassParser);
 
 function iseq<A>(p: Parser<A>): Parser<A[]> {
     return Parser.sat(/^\ni */)

@@ -1,6 +1,6 @@
 import examples.maybe
 
-interface List a
+type List a
     fold b: 
         b
         a -> List a -> b
