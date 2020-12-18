@@ -1,4 +1,4 @@
-import examples.nothing
+import examples.maybe.nothing
 
 type Maybe a
     maybe b: b -> (a -> b) -> b

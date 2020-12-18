@@ -24,7 +24,7 @@ export class EmemberAccess extends Expr {
             const [f, ts] = matchInterfaceType(instanceType);
             const iface = await env.imports[f]?.instantiate(ts);
             if (iface == null)
-                throw new Error(`Could not find interface ${f} in ${this.show(0, 0)}.`);
+                throw new Error(`Could not find interface ${f} in ${this.show(0, 0)}. Environment:${env.show()}`);
             const mt = iface.types[this.x];
             if (mt == null)
                 throw new Error(`Interface ${f} does not have a member ${this.x}.`)

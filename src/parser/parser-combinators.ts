@@ -25,6 +25,15 @@ export class Parser<A> {
         }));
     }
 
+    seek(n: number) {
+        return new Parser(cs => {
+            const r = this.run(cs);
+            if (r == null)
+                return undefined;
+            return [r[0], r[1] + n];
+        })
+    }
+
     static empty<A>(): Parser<A> {
         return _cache['empty'] ?? (_cache['empty'] = new Parser(_ => undefined));
     }
@@ -130,5 +139,15 @@ export class Parser<A> {
 
     static choices<A>(...ps: Parser<A>[]): Parser<A> {
         return ps.reduce((p1, p2) => p1.choice(p2));
+    }
+
+    fatal(error: Error): Parser<A> {
+        return new Parser(cs => {
+            const r = this.run(cs);
+            error.message += ": Unexpected: " + cs;
+            if (r == null)
+                throw error;
+            return r;
+        });
     }
 }

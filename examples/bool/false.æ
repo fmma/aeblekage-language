@@ -1,0 +1,7 @@
+import examples.bool
+import examples.unit
+
+type False : Bool
+    if t f = f Unit
+    and _ = False
+    or b = b Unit

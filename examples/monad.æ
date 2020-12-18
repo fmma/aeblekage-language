@@ -1,0 +1,3 @@
+type Monad f a
+    static return a: a -> f a
+    bind b: (a -> f b) -> f b

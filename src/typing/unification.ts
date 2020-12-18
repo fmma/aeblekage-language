@@ -2,7 +2,7 @@ import { Type } from "../types/ast/type";
 import { resetFresh } from "./fresh";
 import { Substitution } from "./substitution";
 
-const _debugUnify = false;
+const _debugUnify = true;
 
 export class Unification {
     globalSubst = new Substitution({});
@@ -13,7 +13,7 @@ export class Unification {
     }
 
     delayUnify(t: Type, f: (t0: Type) => Promise<void>) {
-        this.delayedUnifications.push([t, f]);
+        this.delayedUnifications.unshift([t, f]);
     }
 
     async end() {

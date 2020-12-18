@@ -1,0 +1,6 @@
+import examples.functor
+import examples.fun
+
+type JustF a : Functor JustF a
+    val: a
+    map f = JustF (f val)

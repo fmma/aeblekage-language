@@ -1,5 +1,6 @@
 import examples.list
-import examples.just
+import examples.bool
+import examples.maybe.just
 
 type Cons a : List a
     x : a
@@ -7,7 +8,15 @@ type Cons a : List a
 
     fold nil cons = cons x xs
     foldr x0 f = f x (xs.foldr x0 f)
+    foldl x0 f = xs.foldl (f x0 x) f
     head = Just x
     append ys = Cons x (xs.append ys)
     length = 1 + xs.length
     map f = Cons (f x) (xs.map f)
+    flatmap f = 
+        ys = f x
+        zs = xs.flatmap f
+        ys.append zs
+    filter f = (f x).if
+        _ => Cons x (xs.filter f)
+        _ => xs.filter f

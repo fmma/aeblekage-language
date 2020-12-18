@@ -1,38 +1,43 @@
-import { join } from 'path';
-import { promises, existsSync } from 'fs';
+import { promises } from 'fs';
+import globlib from 'glob';
 import { astParser } from "./parser/astParser";
 import { sanitizeSrc } from './parser/indentTokenizer';
 import { Class } from './types/ast/class';
-import globlib from 'glob';
 
 export const libDirs = ['.'];
 
-export function whereis(path: string): string {
-    for (let i = 0; i < libDirs.length; ++i) {
-        const dir = join(libDirs[i], path);
-        if (existsSync(dir))
-            return dir;
-    }
-    throw new Error(`Cannot find file ${path}. Searched locations: ${libDirs.join(', ')}`);
-}
-
 const fileCache: Record<string, Class | undefined> = {};
+const globCache: Record<string, Class[] | undefined> = {};
 
-export async function requireImport(path: string[]): Promise<Class> {
-    const joinedPath = path.join('.');
-    const cachedValue = fileCache[joinedPath];
+export async function requireImportFile(fp: string): Promise<Class> {
+    const cachedValue = fileCache[fp];
     if (cachedValue)
         return cachedValue;
-    let fp = whereis(path.join('/') + '.æ');
     let input = await promises.readFile(fp, "utf8");
     input = sanitizeSrc(input)
     const result = astParser.run(input);
     if (result == null)
-        throw new Error(`Parse error in ${joinedPath}. Tokens:\n${input}`);
+        throw new Error(`Parse error in ${fp}. Tokens:\n${input}`);
     if (result[1] < input.length)
-        throw new Error(`Incomplete parse in ${joinedPath}. Tokens:\n${input.substring(result[1])}`)
-    fileCache[joinedPath] = result[0];
+        throw new Error(`Incomplete parse in ${fp}. Tokens:\n${input.substring(result[1])}`)
+    fileCache[fp] = result[0];
     return result[0];
+}
+
+export async function requireImportPath(path: string[]): Promise<Class[]> {
+    const cachedValue = globCache[path.join('.')];
+    if (cachedValue)
+        return cachedValue;
+
+    const paths = libDirs.flatMap(lib => [
+        [lib, ...path].join('/') + '.æ',
+        [lib, ...path, path[path.length - 1]].join('/') + '.æ'
+    ]);
+    const fps = await glob(paths);
+
+    const result = await Promise.all(fps.map(fp => requireImportFile(fp)));
+    globCache[path.join('.')] = result;
+    return result;
 }
 
 export async function glob(pattern: string[]): Promise<string[]> {

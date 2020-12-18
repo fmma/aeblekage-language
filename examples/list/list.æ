@@ -1,0 +1,26 @@
+import examples.maybe
+import examples.bool
+
+type List a
+    fold b: b -> (a -> List a -> b) -> b
+    foldr b: b -> (a -> b -> b) -> b
+    foldl b: b -> (b -> a -> b) -> b
+    head: Maybe a
+    append: List a -> List a
+    length: number
+    map b: (a -> b) -> List b
+    flatmap b: (a -> List b) -> List b
+    filter: (a -> Bool) -> List a
+
+/* TODO
+    instance List number
+        sum: number
+        product: number
+
+    instance List Bool
+        and: Bool
+        or: Bool
+
+    forall b. instance List (List b)
+        concat: List b
+*/

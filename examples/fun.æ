@@ -1,0 +1,21 @@
+type Fun
+    id a: a -> a
+    id x = x
+
+    const a b: a -> b -> a
+    const x _ = x
+
+    compose a b c: (b -> c) -> (a -> b) -> a -> c
+    compose f g x = f (g x)
+
+    pipe a b c: (a -> b) -> (b -> c) -> a -> c
+    pipe f g = compose g f
+
+    flip a b c: (a -> b -> c) -> b -> a -> c
+    flip f x y = f y x
+
+    apply a b: (a -> b) -> a -> b
+    apply f = f
+
+    endlessLoop a: a
+    endlessLoop = endlessLoop

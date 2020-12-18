@@ -101,7 +101,7 @@ export class Class extends Ast {
 
 
     async instantiate(ts: Type[]): Promise<Class> {
-        const imports = await Promise.all(this.imports.map(loadImport));
+        const imports = (await Promise.all(this.imports.map(loadImport))).flat();
         if (ts.length !== this.params.length)
             throw new Error(`Paramter count mismatch in instantiation of ${this.name} with (${ts.map(x => x.show()).join(', ')})`);
 

@@ -37,7 +37,11 @@ export class Substitution implements Substitutable<Substitution> {
     substitute(subst: Substitution): Substitution {
         const ret = new Substitution({});
         Object.keys(this.subst).forEach(k => {
-            ret.subst[k] = this.subst[k]?.substitute(subst);
+            const t = (this.subst[k] as Type).substitute(subst);
+            if (t?.unificationType.type === 'var' && t.unificationType.value === k)
+                delete ret.subst[k];
+            else
+                ret.subst[k] = t;
         });
         return ret;
     }

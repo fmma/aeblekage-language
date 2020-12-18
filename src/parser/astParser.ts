@@ -6,13 +6,17 @@ import { Member } from "../types/ast/member";
 import { MemberType } from "../types/ast/memberType";
 import { Type } from "../types/ast/type";
 import { Tfun } from "../types/ast/type/fun";
-import { parseIdent, parseNewline } from "./common";
+import { indentedSeq, parseIdent, parseNewline } from "./common";
 import { exprParser } from "./exprParser";
 import { Parser } from "./parser-combinators";
-import { typeParser } from "./typeParser";
+import { typeAtomParser, typeParser } from "./typeParser";
 
 export const astImportParser: Parser<Import>
-    = Parser.sat(/^import  */).pre(parseIdent.sepby1(Parser.sat(/^\./)).map(x => new Import(x)));
+    = Parser.do(
+        Parser.sat(/^import  */),
+        parseIdent.sepby1(Parser.sat(/^\./)),
+        Parser.sat(/^\.\* */).map(_ => '*').optional()
+    ).map(([_, xs, star]) => new Import(star ? [...xs, star] : xs));
 
 export const astMemberTypeParser: Parser<MemberType>
     = parseIdent.bind(f =>
@@ -24,21 +28,17 @@ export const astMemberParser: Parser<Member>
     = parseIdent.bind(f =>
         parseIdent.many().bind(as =>
             Parser.sat(/^= */).pre((
-                exprParser.map(x => new ExprSequence([x]))
-                    .choice(astExprSequenceParser))
+                exprParser.fatal(new Error('exprParser')).map(x => new ExprSequence([x])))
                 .map(es => new Member(f, as, es)))));
 
-export const astExprSequenceParser: Parser<ExprSequence>
-    = iseq(exprParser).map(es => new ExprSequence(es));
-
 export const astTypeSequenceParser: Parser<Type>
-    = iseq(typeParser).map(ts => ts.reduceRight((t2, t1) => new Tfun(t1, t2)));
+    = indentedSeq(typeParser).map(ts => ts.reduceRight((t2, t1) => new Tfun(t1, t2)));
 
 export const astParserClassInterface: Parser<ClassType | undefined>
     = Parser.do(
         Parser.sat(/^: */),
         parseIdent,
-        typeParser.many()
+        typeAtomParser.many()
     ).map(([_, f, as]) => new ClassType(f, as)).optional();
 
 export const astClassParser: Parser<Class>
@@ -48,19 +48,7 @@ export const astClassParser: Parser<Class>
         parseIdent,
         parseIdent.many(),
         astParserClassInterface,
-        iseq(astMemberTypeParser.disjointChoice(astMemberParser)),
+        indentedSeq(astMemberTypeParser.disjointChoice(astMemberParser)),
     ).map(([is, _2, f, as, iface, ms]) => new Class(is, f, as, iface, ms));
 
 export const astParser = Parser.sat(/\s*/).pre(astClassParser);
-
-function iseq<A>(p: Parser<A>): Parser<A[]> {
-    return Parser.sat(/^\ni */)
-        .pre(p.sepby(parseNewline))
-        .post(Parser.sat(/^\nd */)).choice(Parser.pure([]));
-}
-
-function iseq1<A>(p: Parser<A>): Parser<A[]> {
-    return Parser.sat(/^\ni */)
-        .pre(p.sepby1(parseNewline))
-        .post(Parser.sat(/^\nd */)).choice(Parser.pure([]));
-}

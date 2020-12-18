@@ -1,4 +1,4 @@
-import { requireImport } from "../fileio";
+import { requireImportPath } from "../fileio";
 import { Class } from "../types/ast/class";
 import { Import } from "../types/ast/import";
 import { Tsymbol } from "../types/ast/type/symbol";
@@ -8,13 +8,13 @@ import { Unification } from "./unification";
 
 const _debugTyping = true;
 
-export async function loadImport(i: Import): Promise<Class> {
-    return await requireImport(i.path);
+export async function loadImport(i: Import): Promise<Class[]> {
+    return await requireImportPath(i.path);
 }
 
 export async function requireAndTypeCheck(path: string) {
-    const ifaceOrClass = await requireImport(path.split('.') ?? []);
-    await typecheckClass(ifaceOrClass);
+    const types = await requireImportPath(path.split('.') ?? []);
+    await Promise.all(types.map(typecheckType));
     return 0;
 }
 
@@ -41,10 +41,12 @@ function getConstructors(imports: Class[]): Record<string, Polytype | undefined>
     return cstrs;
 }
 
-async function typecheckClass(cl: Class) {
-    const imports = await Promise.all(cl.imports.map(loadImport));
+async function typecheckType(cl: Class) {
+    const imports = (await Promise.all(cl.imports.map(loadImport))).flat();
     const ifaces = getIfaces(imports);
     const cstrs = getConstructors(imports);
+
+    ifaces[cl.iface?.name ?? cl.name] = cl.iface?.name ? ifaces[cl.iface?.name] : cl;
     cl = await cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)));
 
     if (cl.freeVars().length > 0)

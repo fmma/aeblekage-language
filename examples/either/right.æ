@@ -1,0 +1,5 @@
+import examples.either
+
+type Right a b : Either a b
+    value: b
+    case _ g = g value

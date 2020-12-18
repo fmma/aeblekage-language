@@ -11,7 +11,7 @@ export class ExprSequence extends Ast {
     }
 
     show(indent: number) {
-        return this.es.map(e => this.indentedLine(indent, e.show(indent))).join('');
+        return this.es.map(e => e.show(indent)).join('\n');
     }
 
     typeInf(env: Env): Type {

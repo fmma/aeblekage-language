@@ -1,11 +1,13 @@
 
-export const INDENT = '\ni'
-export const DEDENT = '\nd'
-export const NEWLINE = '\nnl'
+export const INDENT = '\n{i}'
+export const DEDENT = '\n{d}'
+export const NEWLINE = '\n{nl}'
 
 export function sanitizeSrc(string: string): string {
     const stack: (number | string)[] = [];
-    const lines = string.split(/[\r\n]+/g).flatMap(((l) => sanitizeLine(stack, l)));
+    const lines = string
+        .replace(/\/\*([\s\S]*?)\*\//g, '')
+        .split(/[\r\n]+/g).flatMap(((l) => sanitizeLine(stack, l)));
 
     while (stack[stack.length - 1] > 0) {
         stack.pop();
@@ -36,11 +38,14 @@ function sanitizeLine(stack: (number | string)[], line: string): string[] {
             stack.push(leadingSpaces);
             result.push(INDENT);
         }
+        let nl = false;
         while (stack[stack.length - 1] > leadingSpaces) {
+            nl = true;
             stack.pop();
             result.push(DEDENT);
-            result.push(NEWLINE);
         }
+        if (nl)
+            result.push(NEWLINE);
     }
     for (let i = 0; i < line.length; ++i) {
         if ("({[".indexOf(line[i]) > -1) {

@@ -16,7 +16,7 @@ export class Member extends Ast implements Substitutable<Member> {
     }
 
     show(indent: number) {
-        return this.indentedLine(indent, [this.name, ...this.args].join(' ')) + this.value.show(indent + 2);
+        return this.indentedLine(indent, `${[this.name, ...this.args].join(' ')} = ${this.value.show(indent + 2)}`);
     }
 
     typeInf(env: Env): Type {
@@ -26,7 +26,7 @@ export class Member extends Ast implements Substitutable<Member> {
         return ts.reduceRight((t, ti) => new Tfun(ti[1], t), t);
     }
 
-    
+
     substitute(): Member {
         return this;
     }
