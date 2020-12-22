@@ -20,8 +20,9 @@ export class Tapp extends Type {
         return new Tapp(this.t1.substitute(subst), this.t2.substitute(subst));
     }
 
-    freeVars(): string[] {
-        return [...new Set([...this.t1.freeVars(), ...this.t2.freeVars()])];
+    freeVars(set: Set<string>) {
+        this.t1.freeVars(set);
+        this.t2.freeVars(set);
     }
 
     unificationType = {

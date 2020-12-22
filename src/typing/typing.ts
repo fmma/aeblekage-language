@@ -37,7 +37,7 @@ function getConstructors(imports: Class[]): Record<string, Polytype | undefined>
         if (i instanceof Class) {
             if (cstrs[i.name])
                 throw new Error(`Multiple constructors of name ${i.name}`);
-            if (i.specialTypes.constructorType.freeVars().length === 0)
+            if (i.specialTypes.constructorType.isClosed())
                 cstrs[i.name] = i.specialTypes.constructorType;
         }
     });
@@ -52,8 +52,10 @@ async function typecheckType(cl: Class) {
     ifaces[cl.iface?.name ?? cl.name] = cl.iface?.name ? ifaces[cl.iface?.name] : cl;
     cl = await cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)));
 
-    if (cl.freeVars().length > 0)
-        throw new Error(`Unbound type variable(s): ${cl.freeVars().join(', ')}.`);
+    const set = new Set<string>();
+    cl.freeVars(set);
+    if (set.size > 0)
+        throw new Error(`Unbound type variable(s): ${[...set.values()].join(', ')}.`);
 
     const iface = cl.iface
         ? await ifaces[cl.iface.name]?.instantiate(cl.iface.params)

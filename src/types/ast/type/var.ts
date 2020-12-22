@@ -26,8 +26,8 @@ export class Tvar extends Type {
         return subst.subst[this.name] ?? this;
     }
 
-    freeVars(): string[] {
-        return [this.name];
+    freeVars(set: Set<string>) {
+        set.add(this.name);
     }
 
     unificationType = {

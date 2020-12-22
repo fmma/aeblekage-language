@@ -25,9 +25,10 @@ export class MemberType extends Ast implements Substitutable<MemberType> {
         return new MemberType(this.name, this.params, this.value.substitute(subst.unset(this.params)));
     }
 
-    freeVars(): string[] {
-        return this.value
-            .freeVars()
-            .filter(x => this.params.indexOf(x) === -1);
+    freeVars(set: Set<string>) {
+        this.value.freeVars(set);
+        for (let param of this.params) {
+            set.delete(param);
+        }
     }
 }

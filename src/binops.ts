@@ -20,8 +20,9 @@ export class Binop {
         if (parsedType == null)
             throw new Error('Binop type parser failed');
         parsedType[0] = parsedType[0].substitute(new Substitution({ 'Bool': new Tsymbol('Bool') }));
-        if (parsedType[0].freeVars().length > 0)
-            throw new Error(`Binop ${symbol} : ${parsedType[0].show()} has free vars ${parsedType[0].freeVars()}`);
+
+        if (!parsedType[0].isClosed())
+            throw new Error(`Binop ${symbol} : ${parsedType[0].show()} has free vars.`);
         this.type = parsedType[0];
     }
 

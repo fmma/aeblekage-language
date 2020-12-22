@@ -4,5 +4,5 @@ export default {
         file: 'cli.js',
         format: 'cjs'
     },
-    external: [ 'fs', 'path' ]
+    external: ['fs', 'path', 'process', 'yargs', 'glob']
 };

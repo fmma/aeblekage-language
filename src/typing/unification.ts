@@ -61,7 +61,7 @@ export class Unification {
         if (t2.unificationType.type === 'var' && x === t2.unificationType.value)
             return;
 
-        if (t2.freeVars().indexOf(x) !== -1)
+        if (t2.occurs(x))
             throw new Error(`Occurs check ${x} occurs in ` + t2.show());
 
         const t3 = this.globalSubst.subst[x];

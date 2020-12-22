@@ -46,14 +46,10 @@ export class Substitution implements Substitutable<Substitution> {
         return ret;
     }
 
-    freeVars(): string[] {
-        const ret: string[] = [];
+    freeVars(set: Set<string>) {
         Object.keys(this.subst).forEach(k => {
-            this.subst[k]?.freeVars().forEach(x => {
-                ret.push(x);
-            });
+            this.subst[k]?.freeVars(set);
         });
-        return [... new Set(ret)];
     }
     show(): string {
         return Object.keys(this.subst)

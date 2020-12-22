@@ -16,7 +16,9 @@ export class ClassType extends Ast implements Substitutable<ClassType> {
             this.params.map(t => t.substitute(subst))
         );
     }
-    freeVars(): string[] {
-        return [...new Set(this.params.flatMap(a => a.freeVars()))];
+    freeVars(set: Set<string>) {
+        for (let param of this.params) {
+            param.freeVars(set);
+        }
     }
 }

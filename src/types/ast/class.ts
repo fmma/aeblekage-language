@@ -113,11 +113,17 @@ export class Class extends Ast {
         ].join('');
     }
 
-    freeVars(): string[] {
-        return [...new Set([
-            ...this.members.flatMap(m => m.freeVars()),
-            ...this.iface?.freeVars() ?? []
-        ])].filter(x => [this.name, this.iface?.name ?? '', ...this.params].indexOf(x) === -1);
+    freeVars(set: Set<string>) {
+        for (let member of this.members) {
+            member.freeVars(set);
+        }
+        this.iface?.freeVars(set);
+        for (let param of this.params) {
+            set.delete(param);
+        }
+        set.delete(this.name);
+        if (this.iface)
+            set.delete(this.iface.name);
     }
 
     async instantiate(ts: Type[]): Promise<Class> {

@@ -1,5 +1,4 @@
 import { Type } from "../types/ast/type";
-import { Tsymbol } from "../types/ast/type/symbol";
 import { Instatiable } from "./instatiable";
 import { Substitutable } from "./substitutable";
 import { Substitution } from "./substitution";
@@ -23,10 +22,17 @@ export class Polytype implements Substitutable<Polytype>, Instatiable<Type> {
         return new Polytype(this.params, this.monotype.substitute(subst.unset(this.params)));
     }
 
-    freeVars(): string[] {
-        return this.monotype
-            .freeVars()
-            .filter(x => this.params.indexOf(x) === -1);
+    freeVars(set: Set<string>) {
+        this.monotype.freeVars(set);
+        for (let param of this.params) {
+            set.delete(param);
+        }
+    }
+
+    isClosed() {
+        const set = new Set<string>();
+        this.freeVars(set);
+        return set.size === 0;
     }
 
     show() {

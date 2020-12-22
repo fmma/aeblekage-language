@@ -6,7 +6,8 @@
   "scripts": {
     "build": ".\\scripts\\build.cmd",
     "watch": "start .\\scripts\\watch.cmd",
-    "test": "node test/test.js"
+    "test": "node test/test.js",
+    "clean": ".\\scripts\\clean.cmd"
   },
   "repository": {
     "type": "git",

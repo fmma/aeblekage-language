@@ -11,6 +11,14 @@ export type UnificationType = { type: 'cstr', name: string, args: Type[] } | { t
 // fun: 1 -> 0  parens when >= 1  a->b->c  (a->b)->c
 export abstract class Type extends Ast implements Substitutable<Type> {
     abstract substitute(subst: Substitution): Type;
-    abstract freeVars(): string[];
+    abstract freeVars(set: Set<string>): void;
+    
+
+    occurs(x: string): boolean {
+        const set = new Set<string>();
+        this.freeVars(set);
+        return set.has(x);
+    }
+
     abstract unificationType: UnificationType;
 }

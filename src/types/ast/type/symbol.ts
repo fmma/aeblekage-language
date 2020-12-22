@@ -15,8 +15,7 @@ export class Tsymbol extends Type {
         return this;
     }
 
-    freeVars(): string[] {
-        return [];
+    freeVars(set: Set<string>) {
     }
 
     unificationType = {
