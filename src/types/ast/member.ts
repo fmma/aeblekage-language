@@ -21,18 +21,10 @@ export class Member extends Ast implements Substitutable<Member> {
     }
 
     typeInf(env: Env): Type {
-        try {
-            const ts = this.args.map(x => [x, Tvar.fresh()] as [string, Type]);
-            const env0 = env.addAll(ts);
-            const t = this.value.typeInf(env0);
-            return ts.reduceRight((t, ti) => new Tfun(ti[1], t), t[0]);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                error.message = `Type error in ${this.name}` + error.message;
-            }
-            throw error;
-        }
+        const ts = this.args.map(x => [x, Tvar.fresh()] as [string, Type]);
+        const env0 = env.addAll(ts);
+        const t = this.value.typeInf(env0);
+        return ts.reduceRight((t, ti) => new Tfun(ti[1], t), t[0]);
     }
 
     interp(ctx: Context<any>): any {

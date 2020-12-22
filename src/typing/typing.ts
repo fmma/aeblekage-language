@@ -33,23 +33,24 @@ function getIfaces(imports: (Class)[]): Record<string, Class | undefined> {
 
 function getConstructors(imports: Class[]): Record<string, Polytype | undefined> {
     const cstrs = {} as Record<string, Polytype | undefined>;
-    imports.forEach(i => {
+    for (let i of imports) {
         if (i instanceof Class) {
             if (cstrs[i.name])
                 throw new Error(`Multiple constructors of name ${i.name}`);
             if (i.specialTypes.constructorType.isClosed())
                 cstrs[i.name] = i.specialTypes.constructorType;
         }
-    });
+    };
     return cstrs;
 }
 
-async function typecheckType(cl: Class) {
+async function typecheckType(cl: Class): Promise<void> {
     const imports = (await Promise.all(cl.imports.map(loadImport))).flat();
     const ifaces = getIfaces(imports);
     const cstrs = getConstructors(imports);
 
     ifaces[cl.iface?.name ?? cl.name] = cl.iface?.name ? ifaces[cl.iface?.name] : cl;
+
     cl = await cl.instantiate(cl.params.map(x => new Tsymbol(`$${x}`)));
 
     const set = new Set<string>();
@@ -60,23 +61,23 @@ async function typecheckType(cl: Class) {
     const iface = cl.iface
         ? await ifaces[cl.iface.name]?.instantiate(cl.iface.params)
         : undefined;
-    Object.keys(cl.types).forEach(k => {
+
+    for (let k of Object.keys(cl.types)) {
         if (iface?.types[k]) {
             throw new Error(`Redefinition of type ${k} from interface ${iface.name} in class ${cl.name} is not allowed.`);
         }
-    });
+    };
 
     if (_debugTyping) {
         console.log(iface?.show(0));
         console.log(cl.show(0));
-
-        console.log('CHECK:');
     }
 
     for (let k of Object.keys(iface?.types ?? {})) {
         if (iface?.defs[k] == null && cl.defs[k] == null)
             throw new Error(`Interface method ${iface?.name}.${k} not implemented in ${cl.name}.`);
     };
+
     for (let k of Object.keys(cl.defs)) {
         await checkMemberDef(k, cl, iface, ifaces, cstrs);
     };
@@ -116,8 +117,18 @@ async function checkMemberDef(name: string,
     const targetType = type.polytype().instantiateArbitrary();
 
     const inferredType = cl.defs[name].typeInf(env);
-    env.unification.unify(inferredType, targetType);
-    await env.unification.end();
+
+    try {
+        env.unification.unify(inferredType, targetType);
+        await env.unification.end();
+
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            error.message = `Type error in ${name} : ${type.polytype().show()}\n` + error.message;
+        }
+        throw error;
+    }
     if (_debugTyping) {
         console.log(`OK ${inferredType.show()} === ${targetType.show()} in:`);
         console.log(env.unification.globalSubst.show());

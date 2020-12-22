@@ -47,7 +47,7 @@ export class Unification {
                 }
             }
             else
-                throw this.unificationError(t1, t2);
+                throw this.unificationError(type1, type2, t1, t2);
         }
     }
 
@@ -72,7 +72,7 @@ export class Unification {
         this.globalSubst.subst[x] = t2;
     }
 
-    unificationError(t1: Type, t2: Type): Error {
-        return new Error(`Unification error ${t1.show()} = ${t2.show()}`);
+    unificationError(type1: Type, type2: Type, t1: Type, t2: Type): Error {
+        return new Error(`Unification error ${t1.show()} != ${t2.show()} in the unification of:\n${type1.show()}   with:\n${type2.show()}`);
     }
 }
