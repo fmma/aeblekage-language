@@ -2,7 +2,10 @@ import { Type } from "../types/ast/type";
 import { resetFresh } from "./fresh";
 import { Substitution } from "./substitution";
 
-const _debugUnify = true;
+let _debugUnify = false;
+export function _debugTurnOnUnify() {
+    _debugUnify = true;
+}
 
 export class Unification {
     globalSubst = new Substitution({});
@@ -23,22 +26,29 @@ export class Unification {
         }
     }
 
-    unify(t1: Type, t2: Type): void {
-        const ut1 = t1.unificationType;
-        const ut2 = t2.unificationType;
-        if (_debugUnify) {
-            console.log(t1.show(), '=', t2.show());
+    unify(type1: Type, type2: Type): void {
+        const stack = [[type1, type2]];
+        while (stack.length > 0) {
+            const [t1, t2] = stack.pop()!;
+            const ut1 = t1.unificationType;
+            const ut2 = t2.unificationType;
+            if (_debugUnify) {
+                console.log(t1.show(), '=', t2.show());
+            }
+            if (ut1.type === 'var') {
+                this.unifyVar(ut1.value, t2);
+            }
+            else if (ut2.type === 'var') {
+                this.unify(t2, t1);
+            }
+            else if (ut1.name === ut2.name && ut1.args.length === ut2.args.length) {
+                for (let i = 0; i < ut1.args.length; ++i) {
+                    stack.push([ut1.args[i], ut2.args[i]]);
+                }
+            }
+            else
+                throw this.unificationError(t1, t2);
         }
-        if (ut1.type === 'var') {
-            return this.unifyVar(ut1.value, t2);
-        }
-        if (ut2.type === 'var') {
-            return this.unify(t2, t1);
-        }
-        if (ut1.name === ut2.name && ut1.args.length === ut2.args.length) {
-            return this.unifyList(ut1.args, ut2.args)
-        }
-        throw this.unificationError(t1, t2);
     }
 
     unifyList(ts1: Type[], ts2: Type[]): void {

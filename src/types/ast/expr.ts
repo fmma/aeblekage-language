@@ -1,3 +1,4 @@
+import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
 import { Ast } from "../ast";
 import { Type } from "./type";
@@ -20,4 +21,5 @@ import { Type } from "./type";
 export abstract class Expr extends Ast {
     // G, e |- t
     abstract typeInf(env: Env): Type;
+    abstract interp(ctx: Context<any>): any;
 }

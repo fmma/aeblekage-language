@@ -1,3 +1,4 @@
+import { Context } from "../../../interp/context";
 import { Env } from "../../../typing/env";
 import { Expr } from "../expr";
 import { Type } from "../type";
@@ -22,5 +23,11 @@ export class Eapp extends Expr {
         const tx = Tvar.fresh();
         env.unification.unify(t1, new Tfun(t2, tx));
         return tx;
+    }
+
+    interp(ctx: Context<any>): any {
+        const f = this.e1.interp(ctx);
+        const v = this.e2.interp(ctx);
+        return f(v);
     }
 }

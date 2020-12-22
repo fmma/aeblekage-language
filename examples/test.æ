@@ -1,0 +1,58 @@
+import examples.bool
+
+type Test
+    oneliner: number
+    oneliner = 2 + 3 * 10
+
+    multiliner: number
+    multiliner =
+        2 + 3 * 10
+
+    multiliner2: number
+    multiliner2 =
+        2 + 2
+        3 * 3
+        4 - 5
+
+    testLet: number
+    testLet =
+        x = 20
+        y = 30
+        x + y
+
+    testMultilineLet : number
+    testMultilineLet =
+        x =
+            z = 2 + 2
+            q =
+                f x = x
+                f z
+            3 * z + q
+        x
+
+    testShadow: number
+    testShadow =
+        x = "hello"
+        x = 30
+        x
+
+    testLambda: number
+    testLambda =
+        f = x => x
+        g = x y => x
+        g ((x => x) (f (f (f 10)))) "hello"
+
+    testBinop: Bool
+    testBinop =
+        20 + 30 > 10 && 1*2 == 3 || 2 >= 3
+
+    testExprItemApp: number
+    testExprItemApp =
+        f x y = y
+        f
+            "hej"
+            f "hej" 10
+        x = f
+            "hej"
+            10
+        x

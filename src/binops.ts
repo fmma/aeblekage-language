@@ -1,5 +1,7 @@
 import { polytypeParser } from "./parser/typeParser";
+import { Tsymbol } from "./types/ast/type/symbol";
 import { Polytype } from "./typing/polytype";
+import { Substitution } from "./typing/substitution";
 
 export class Binop {
 
@@ -10,12 +12,16 @@ export class Binop {
         readonly leftSubPrecedence: number,
         readonly rightSubPrecedence: number,
         readonly precedence: number,
-        type: string
+        type: string,
+        readonly interp: (x: any, y: any) => any
     ) {
         this.regexp = new RegExp(`^${escapeRegExp(symbol)}\\ *`);
         const parsedType = polytypeParser.run(type);
         if (parsedType == null)
             throw new Error('Binop type parser failed');
+        parsedType[0] = parsedType[0].substitute(new Substitution({ 'Bool': new Tsymbol('Bool') }));
+        if (parsedType[0].freeVars().length > 0)
+            throw new Error(`Binop ${symbol} : ${parsedType[0].show()} has free vars ${parsedType[0].freeVars()}`);
         this.type = parsedType[0];
     }
 
@@ -36,17 +42,17 @@ export class BinopPrecedenceHierarchy {
 }
 
 export const binops = [
-    new Binop('||', 102, 103, 103, 'forall. bool -> bool -> bool'),
-    new Binop('&&', 104, 105, 105, 'forall. bool -> bool -> bool'),
-    new Binop('==', 106, 107, 107, 'forall a. a -> a -> a'),
-    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> a'),
-    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> a'),
-    new Binop('>', 106, 107, 107, 'forall a. a -> a -> a'),
-    new Binop('<', 106, 107, 107, 'forall a. a -> a -> a'),
-    new Binop('+', 108, 109, 109, 'forall. number -> number -> number'),
-    new Binop('-', 108, 109, 109, 'forall. number -> number -> number'),
-    new Binop('*', 110, 111, 111, 'forall. number -> number -> number'),
-    new Binop('/', 110, 111, 111, 'forall. number -> number -> number')
+    new Binop('||', 102, 103, 103, 'forall. Bool -> Bool -> Bool', (x, y) => x || y),
+    new Binop('&&', 104, 105, 105, 'forall. Bool -> Bool -> Bool', (x, y) => x && y),
+    new Binop('==', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x == y),
+    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x >= y),
+    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x <= y),
+    new Binop('>', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x > y),
+    new Binop('<', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x < y),
+    new Binop('+', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x + y),
+    new Binop('-', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x - y),
+    new Binop('*', 110, 111, 111, 'forall. number -> number -> number', (x, y) => x * y),
+    new Binop('/', 110, 111, 111, 'forall. number -> number -> number', (x, y) => x / y)
 ]
 
 export const binopPrecedenceHierarchy: BinopPrecedenceHierarchy = initializePrecedenceBinopHierarchy();

@@ -6,7 +6,10 @@ import { Env } from "./env";
 import { Polytype } from "./polytype";
 import { Unification } from "./unification";
 
-const _debugTyping = true;
+let _debugTyping = false;
+export function _debugTurnTyping() {
+    _debugTyping = true;
+}
 
 export async function loadImport(i: Import): Promise<Class[]> {
     return await requireImportPath(i.path);

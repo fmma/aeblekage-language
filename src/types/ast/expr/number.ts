@@ -13,8 +13,12 @@ export class Enumber extends Expr {
     show() {
         return String(this.value);
     }
-    
+
     typeInf(): Type {
         return Enumber.type;
+    }
+
+    interp(): any {
+        return this.value;
     }
 }

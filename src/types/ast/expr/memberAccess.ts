@@ -1,3 +1,4 @@
+import { Context } from "../../../interp/context";
 import { Env } from "../../../typing/env";
 import { Expr } from "../expr";
 import { Type } from "../type";
@@ -32,9 +33,13 @@ export class EmemberAccess extends Expr {
         });
         return tx;
     }
+
+    interp(ctx: Context<any>): any {
+        return this.e.interp(ctx)[this.x];
+    }
 }
 
-function matchInterfaceType(t: Type): [string, Type[]] {
+export function matchInterfaceType(t: Type): [string, Type[]] {
     if (t instanceof Tapp) {
         const [f, ts] = matchInterfaceType(t.t1)
         ts.push(t.t2);

@@ -1,4 +1,8 @@
 export let _debugAlwaysShowParethesis = false;
+export function _debugTurnOnAlwaysShowParethesis() {
+    _debugAlwaysShowParethesis = true;
+}
+
 
 export abstract class Ast {
 

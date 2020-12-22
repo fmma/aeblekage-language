@@ -36,6 +36,6 @@ export class Env {
     show(): string {
         return Object.keys(this.env)
             .map(x => `${x} => ${this.env[x]?.show()}`)
-            .join('\n') + '\nInterfaces: ' + Object.keys(this.imports).join(',');
+            .join('\n') + '\nImports: ' + Object.keys(this.imports).join(',');
     }
 }

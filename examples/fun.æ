@@ -17,5 +17,5 @@ type Fun
     apply a b: (a -> b) -> a -> b
     apply f = f
 
-    endlessLoop a: a
-    endlessLoop = endlessLoop
+    undef a: a
+    undef = undef

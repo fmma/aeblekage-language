@@ -1,3 +1,0 @@
-type Indent
-    foo: bool
-    foo = true

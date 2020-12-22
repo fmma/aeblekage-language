@@ -1,4 +1,5 @@
 import { Binop } from "../../../binops";
+import { Context } from "../../../interp/context";
 import { Env } from "../../../typing/env";
 import { Expr } from "../expr";
 import { Type } from "../type";
@@ -21,7 +22,7 @@ export class Ebinop extends Expr {
             this.e2.show(indent, this.binop.rightSubPrecedence)
         ].join(' '), precedence >= this.binop.precedence);
     }
-    
+
     typeInf(env: Env): Type {
         const t1 = this.e1.typeInf(env);
         const t2 = this.e2.typeInf(env);
@@ -29,5 +30,9 @@ export class Ebinop extends Expr {
         const tx = Tvar.fresh();
         env.unification.unify(t3, new Tfun(t1, new Tfun(t2, tx)));
         return tx;
+    }
+
+    interp(ctx: Context<any>): any {
+        return this.binop.interp(this.e1.interp(ctx), this.e2.interp(ctx));
     }
 }

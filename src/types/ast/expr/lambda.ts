@@ -1,3 +1,4 @@
+import { Context } from "../../../interp/context";
 import { Env } from "../../../typing/env";
 import { Expr } from "../expr";
 import { Type } from "../type";
@@ -19,5 +20,9 @@ export class Elambda extends Expr {
     typeInf(env: Env): Type {
         const tx = Tvar.fresh();
         return new Tfun(tx, this.e.typeInf(env.add(this.x, tx)));
+    }
+
+    interp(ctx: Context<any>): any {
+        return (x: any) => this.e.interp(ctx.add(this.x, x));
     }
 }

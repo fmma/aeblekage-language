@@ -18,4 +18,8 @@ export class Estring extends Expr {
     typeInf(): Type {
         return Estring.type;
     }
+
+    interp() {
+        return this.value;
+    }
 }

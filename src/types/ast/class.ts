@@ -1,3 +1,4 @@
+import { Context } from "../../interp/context";
 import { Polytype } from "../../typing/polytype";
 import { Substitution } from "../../typing/substitution";
 import { loadImport } from "../../typing/typing";
@@ -84,6 +85,26 @@ export class Class extends Ast {
         return env;
     }
 
+    proto(ctx: Context<any>): object {
+        const ifaceProto = this.iface ? ctx.imports[this.iface.name]?.proto(ctx) ?? null : null;
+        const x = Object.create(ifaceProto);
+        Object.keys(this.defs).forEach(k => {
+            x[k] = this.defs[k].interp(ctx);
+        });
+        return x;
+    }
+
+    interpConstructor(ctx: Context<any>): any {
+        return this.constructerx(0, ctx);
+    }
+
+    constructerx(i: number, ctx: Context<any>): any {
+        if (i < this.constructorArgTypes.length) {
+            return (x: any) => this.constructerx(i + 1, ctx.add(`$${i}`, x));
+        }
+        return Object.create({}); // Add $i's to instance. Add members and iface members to proto.
+    }
+
     show(indent: number) {
         return [
             ...this.imports.map(i => i.show(indent)),
@@ -98,7 +119,6 @@ export class Class extends Ast {
             ...this.iface?.freeVars() ?? []
         ])].filter(x => [this.name, this.iface?.name ?? '', ...this.params].indexOf(x) === -1);
     }
-
 
     async instantiate(ts: Type[]): Promise<Class> {
         const imports = (await Promise.all(this.imports.map(loadImport))).flat();
