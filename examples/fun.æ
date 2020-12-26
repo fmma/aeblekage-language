@@ -1,4 +1,4 @@
-type Fun
+type fun
     id a: a -> a
     id x = x
 

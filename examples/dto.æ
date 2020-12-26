@@ -1,4 +1,4 @@
-type Dto a
+type dto a
     id: number
     name: string
     age: number
@@ -15,5 +15,5 @@ type Dto a
     item5: a
     item6: a
 
-    map b: (a -> b) -> Dto b
-    map f = Dto id name age adress1 adress2 datestring phone mobile haircolor height (f item1) (f item2) (f item4) (f item5) (f item6)
+    map b: (a -> b) -> dto b
+    map f = dto id name age adress1 adress2 datestring phone mobile haircolor height (f item1) (f item2) (f item4) (f item5) (f item6)
