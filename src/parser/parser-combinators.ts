@@ -1,3 +1,5 @@
+import { recoverSanitizedSrc } from "./indentTokenizer";
+
 const _cache: Record<string, Parser<any>> = {};
 
 type ParserParam<T> = T extends Parser<infer U> ? U : T;
@@ -144,9 +146,10 @@ export class Parser<A> {
     fatal(error: Error): Parser<A> {
         return new Parser(cs => {
             const r = this.run(cs);
-            error.message += ": Unexpected: " + cs;
-            if (r == null)
+            if (r == null) {
+                error.message += ": Unexpected:\n>>> " + recoverSanitizedSrc(cs);
                 throw error;
+            }
             return r;
         });
     }

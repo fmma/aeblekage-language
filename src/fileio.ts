@@ -1,7 +1,7 @@
 import { promises } from 'fs';
 import globlib from 'glob';
 import { astParser } from "./parser/astParser";
-import { sanitizeSrc } from './parser/indentTokenizer';
+import { recoverSanitizedSrc, sanitizeSrc } from './parser/indentTokenizer';
 import { Class } from './types/ast/class';
 
 export const libDirs = ['.'];
@@ -17,9 +17,9 @@ export async function requireImportFile(fp: string): Promise<Class> {
     input = sanitizeSrc(input)
     const result = astParser.run(input);
     if (result == null)
-        throw new Error(`Parse error in ${fp}. Tokens:\n${input}`);
+        throw new Error(`Parse error in ${fp}. Tokens:\n${recoverSanitizedSrc(input)}`);
     if (result[1] < input.length)
-        throw new Error(`Incomplete parse in ${fp}. Tokens:\n${input.substring(result[1])}`)
+        throw new Error(`Incomplete parse in ${fp}. Tokens:\n${recoverSanitizedSrc(input.substring(result[1]))}`)
     fileCache[fp] = result[0];
     return result[0];
 }

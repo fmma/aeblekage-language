@@ -47,7 +47,7 @@ export const astClassParser: Parser<Class>
         parseIdent,
         parseIdent.many(),
         astParserClassInterface,
-        indentedSeq(astMemberTypeParser.disjointChoice(astMemberParser)),
+        indentedSeq(astMemberTypeParser.disjointChoice(astMemberParser).fatal(new Error(''))),
     ).map(([is, _2, f, as, iface, ms]) => new Class(is, f, as, iface, ms));
 
 export const astParser = Parser.sat(/\s*/).pre(astClassParser);

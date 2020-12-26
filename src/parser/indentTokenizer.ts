@@ -1,23 +1,43 @@
 
-export const INDENT = '\n{i}'
-export const DEDENT = '\n{d}'
-export const NEWLINE = '\n{nl}'
+export function INDENT(ln: number, leadingSpaces: number): string {
+    return `{i:${ln}:${leadingSpaces}}`;
+}
+
+export function DEDENT(ln: number, leadingSpaces: number): string {
+    return `{d:${ln}:${leadingSpaces}}`;
+}
+
+export function NEWLINE(ln: number, leadingSpaces: number): string {
+    return `{n:${ln}:${leadingSpaces}}`;
+}
+
+export function recoverSanitizedSrc(sanitized: string, ln?: number) {
+    return sanitized
+        .replace(/\{.:(\d*):(\d*)\}\ */g, (_, lineNumber, leadingSpaces) => {
+            const result = '\n'.repeat(ln ? lineNumber - ln : 1) + ' '.repeat(leadingSpaces);
+            ln = lineNumber;
+            return result;
+        });
+}
 
 export function sanitizeSrc(string: string): string {
     const stack: (number | string)[] = [];
     const lines = string
-        .replace(/\/\*([\s\S]*?)\*\//g, '')
-        .split(/[\r\n]+/g).flatMap(((l) => sanitizeLine(stack, l)));
+        .replace(/\/\*([\s\S]*?)\*\//g, '') // Remove multiline comments.
+        .split(/\r?\n/) // Split lines.
+
+    const sanitizedLines = lines
+        .flatMap(((l, i) => sanitizeLine(stack, l, i)));
 
     while (stack[stack.length - 1] > 0) {
         stack.pop();
-        lines.push(DEDENT);
+        sanitizedLines.push(DEDENT(lines.length, 0));
     }
-    return lines.join(' ');
+    return sanitizedLines.join(' ');
 }
 
-function sanitizeLine(stack: (number | string)[], line: string): string[] {
-    line = line.replace(/\/\/.*$/, '');
+function sanitizeLine(stack: (number | string)[], line: string, lineNumber: number): string[] {
+    line = line.replace(/\/\/.*$/, ''); // Remove single line comments.
 
     const leadingSpaces = line.search(/\S/);
     if (leadingSpaces === -1)
@@ -26,26 +46,27 @@ function sanitizeLine(stack: (number | string)[], line: string): string[] {
     const firstLine = stack.length === 0;
     if (firstLine)
         stack.push(0);
+
     const top = stack[stack.length - 1];
     const mode = typeof top === 'number';
 
     const result: string[] = [];
     if (mode) {
         if (top === leadingSpaces && !firstLine) {
-            result.push(NEWLINE);
+            result.push(NEWLINE(lineNumber, leadingSpaces));
         }
         else if (top < leadingSpaces) {
             stack.push(leadingSpaces);
-            result.push(INDENT);
+            result.push(INDENT(lineNumber, leadingSpaces));
         }
         let nl = false;
         while (stack[stack.length - 1] > leadingSpaces) {
             nl = true;
             stack.pop();
-            result.push(DEDENT);
+            result.push(DEDENT(lineNumber, leadingSpaces));
         }
         if (nl)
-            result.push(NEWLINE);
+            result.push(NEWLINE(lineNumber, leadingSpaces));
     }
     for (let i = 0; i < line.length; ++i) {
         if ("({[".indexOf(line[i]) > -1) {

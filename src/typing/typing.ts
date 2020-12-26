@@ -34,12 +34,10 @@ function getIfaces(imports: (Class)[]): Record<string, Class | undefined> {
 function getConstructors(imports: Class[]): Record<string, Polytype | undefined> {
     const cstrs = {} as Record<string, Polytype | undefined>;
     for (let i of imports) {
-        if (i instanceof Class) {
-            if (cstrs[i.name])
-                throw new Error(`Multiple constructors of name ${i.name}`);
-            if (i.specialTypes.constructorType.isClosed())
-                cstrs[i.name] = i.specialTypes.constructorType;
-        }
+        if (cstrs[i.name])
+            throw new Error(`Multiple constructors of name ${i.name}`);
+        if (i.specialTypes.constructorType.isClosed())
+            cstrs[i.name] = i.specialTypes.constructorType;
     };
     return cstrs;
 }
