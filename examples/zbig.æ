@@ -1,4 +1,4 @@
-type Big a b c
+type zbig a b c
     bigTypeSignature = bigTypeSignature
     bigTypeSignature : 
         ((((((((((((((((((((((((((((((((((((a -> a -> b -> c))))))))))))))))))))))))))))))))))))

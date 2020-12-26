@@ -1,7 +1,7 @@
 import examples.maybe
 
-type Just a : Maybe a
+type just a : maybe a
     value: a
 
-    maybe x f = f value
+    case x f = f value
     orElse x = this

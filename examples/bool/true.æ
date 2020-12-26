@@ -1,7 +1,7 @@
 import examples.bool
 import examples.unit
 
-type True : Bool
-    if t f = t Unit
-    and b = b Unit
-    or _ = True
+type true : bool
+    if t f = t unit
+    and b = b unit
+    or _ = true

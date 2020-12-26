@@ -1,2 +1,2 @@
-type Either a b
+type either a b
     case c: (a -> c) -> (b -> c) -> c

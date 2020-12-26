@@ -1,2 +1,2 @@
-type Functor f a
-    map b: (a -> b) -> Functor f b
+type functor f a
+    map b: (a -> b) -> functor f b

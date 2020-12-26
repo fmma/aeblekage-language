@@ -1,6 +1,6 @@
 import examples.bool
 
-type Test
+type test
     oneliner: number
     oneliner = 2 + 3 * 10
 
@@ -42,7 +42,7 @@ type Test
         g = x y => x
         g ((x => x) (f (f (f 10)))) "hello"
 
-    testBinop: Bool
+    testBinop: bool
     testBinop =
         20 + 30 > 10 && 1*2 == 3 || 2 >= 3
 

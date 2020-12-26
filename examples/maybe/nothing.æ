@@ -1,5 +1,5 @@
 import examples.maybe
 
-type Nothing a : Maybe a
-    maybe x f = x
+type nothing a : maybe a
+    case x f = x
     orElse x = x

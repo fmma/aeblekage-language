@@ -1,9 +1,9 @@
 import examples.maybe.nothing
 
-type Maybe a
-    maybe b: b -> (a -> b) -> b
-    orElse: Maybe a -> Maybe a
+type maybe a
+    case b: b -> (a -> b) -> b
+    orElse: maybe a -> maybe a
     bind b:
-        a -> Maybe b
-        Maybe b
-    bind f = maybe Nothing f
+        a -> maybe b
+        maybe b
+    bind f = case nothing f

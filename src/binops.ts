@@ -19,7 +19,7 @@ export class Binop {
         const parsedType = polytypeParser.run(type);
         if (parsedType == null)
             throw new Error('Binop type parser failed');
-        parsedType[0] = parsedType[0].substitute(new Substitution({ 'Bool': new Tsymbol('Bool') }));
+        parsedType[0] = parsedType[0].substitute(new Substitution({ 'bool': new Tsymbol('bool') }));
 
         if (!parsedType[0].isClosed())
             throw new Error(`Binop ${symbol} : ${parsedType[0].show()} has free vars.`);
@@ -43,13 +43,13 @@ export class BinopPrecedenceHierarchy {
 }
 
 export const binops = [
-    new Binop('||', 102, 103, 103, 'forall. Bool -> Bool -> Bool', (x, y) => x || y),
-    new Binop('&&', 104, 105, 105, 'forall. Bool -> Bool -> Bool', (x, y) => x && y),
-    new Binop('==', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x == y),
-    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x >= y),
-    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x <= y),
-    new Binop('>', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x > y),
-    new Binop('<', 106, 107, 107, 'forall a. a -> a -> Bool', (x, y) => x < y),
+    new Binop('||', 102, 103, 103, 'forall. bool -> bool -> bool', (x, y) => x || y),
+    new Binop('&&', 104, 105, 105, 'forall. bool -> bool -> bool', (x, y) => x && y),
+    new Binop('==', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x == y),
+    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x >= y),
+    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x <= y),
+    new Binop('>', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x > y),
+    new Binop('<', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x < y),
     new Binop('+', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x + y),
     new Binop('-', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x - y),
     new Binop('*', 110, 111, 111, 'forall. number -> number -> number', (x, y) => x * y),

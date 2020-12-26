@@ -1,16 +1,16 @@
 import examples.list
 import examples.maybe
 
-type Append a : List a
-    xs : List a
-    ys : List a
+type append a : list a
+    xs : list a
+    ys : list a
 
     fold nil cons = xs.fold (ys.fold nil cons) cons
     foldr x0 f = xs.foldr (ys.foldr x0 f) f
     foldl x0 f = ys.foldl (xs.foldl x0 f) f
     head = xs.head.orElse (ys.head)
-    append zs = Append this zs
+    append zs = append this zs
     length = xs.length + ys.length
-    map f = Append (xs.map f) (ys. map f) 
-    flatmap f = Append (xs.flatmap f) (ys.flatmap f)
-    filter f = Append (xs.filter f) (ys.filter f)
+    map f = append (xs.map f) (ys. map f) 
+    flatmap f = append (xs.flatmap f) (ys.flatmap f)
+    filter f = append (xs.filter f) (ys.filter f)

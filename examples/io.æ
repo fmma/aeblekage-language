@@ -1,0 +1,5 @@
+import examples.unit
+
+type io
+    read: string -> string
+    write: string -> string -> unit

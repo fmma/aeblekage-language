@@ -1,13 +1,13 @@
 import examples.list
 import examples.maybe.nothing
 
-type Nil a : List a
+type nil a : list a
     fold nil cons = nil
     foldr x0 _ = x0
     foldl x0 _ = x0
-    head = Nothing
+    head = nothing
     append x = x
     length = 0
-    map _ = Nil
-    flatmap _ = Nil
-    filter _ = Nil
+    map _ = nil
+    flatmap _ = nil
+    filter _ = nil

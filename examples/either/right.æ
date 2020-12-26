@@ -1,5 +1,5 @@
 import examples.either
 
-type Right a b : Either a b
+type right a b : either a b
     value: b
     case _ g = g value

@@ -1,6 +1,6 @@
 import examples.unit
 
-type Bool
-    if a: (Unit -> a) -> (Unit -> a) -> a
-    and: (Unit -> Bool) -> Bool
-    or: (Unit -> Bool) -> Bool
+type bool
+    if a: (unit -> a) -> (unit -> a) -> a
+    and: (unit -> bool) -> bool
+    or: (unit -> bool) -> bool

@@ -1,9 +1,9 @@
-type Pair a b
+type pair a b
     fst: a
     snd: b
 
-    swap: Pair b a
-    swap = Pair snd fst
+    swap: pair b a
+    swap = pair snd fst
 
     map c: (a -> b -> c) -> c
     map f = f fst snd
