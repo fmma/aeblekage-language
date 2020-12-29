@@ -38,4 +38,23 @@ export class Env {
             .map(x => `${x} => ${this.env[x]?.show()}`)
             .join('\n') + '\nImports: ' + Object.keys(this.imports).join(',');
     }
+
+    async getMemberType(instanceType: Type, memberName: string): Promise<Polytype> {
+        try {
+            const [f, ts] = instanceType.matchInterfaceType();
+            const iface = await this.imports[f]?.instantiate(ts);
+            if (iface == null)
+                throw new Error(`Could not find interface ${f}. Environment:${this.show()}`);
+            const t = await iface.getType(memberName);
+            if (t == null)
+                throw new Error(`Interface ${f} does not have a member ${memberName}.`)
+            return t;
+        } catch (error) {
+            throw new Error(`Error in member access ${instanceType.show(2)}.${memberName}: ${error}.`)
+        }
+    }
+
+    beginUnification(): Env {
+        return new Env(this.env, this.imports, new Unification());
+    }
 }

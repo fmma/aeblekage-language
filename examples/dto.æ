@@ -1,3 +1,6 @@
+import examples.number
+import examples.string
+
 type dto a
     id: number
     name: string

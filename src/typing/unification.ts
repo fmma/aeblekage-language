@@ -19,9 +19,9 @@ export class Unification {
         this.delayedUnifications.unshift([t, f]);
     }
 
-    async end() {
+    async end(): Promise<void> {
         while (this.delayedUnifications.length > 0) {
-            const [t, f] = this.delayedUnifications.pop() as [Type, (t0: Type) => Promise<void>];
+            const [t, f] = this.delayedUnifications.pop()!;
             await f(t.substitute(this.globalSubst));
         }
     }

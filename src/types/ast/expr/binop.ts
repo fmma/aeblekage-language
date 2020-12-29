@@ -26,13 +26,17 @@ export class Ebinop extends Expr {
     typeInf(env: Env): Type {
         const t1 = this.e1.typeInf(env);
         const t2 = this.e2.typeInf(env);
-        const t3 = this.binop.type.instantiate();
         const tx = Tvar.fresh();
-        env.unification.unify(t3, new Tfun(t1, new Tfun(t2, tx)));
+
+        env.unification.delayUnify(t1, async instanceType => {
+            const mt = await env.getMemberType(instanceType, this.binop.symbol);
+            env.unification.unify(mt.instantiate(), new Tfun(t2, tx));
+        });
+
         return tx;
     }
 
     interp(ctx: Context<any>): any {
-        return this.binop.interp(this.e1.interp(ctx), this.e2.interp(ctx));
+        return this.e1.interp(ctx)[this.binop.symbol](this.e2.interp(ctx));
     }
 }

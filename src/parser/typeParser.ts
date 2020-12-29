@@ -34,4 +34,5 @@ export const polytypeParser: Parser<Polytype>
         parseIdent.many(),
         Parser.sat(/^\. */),
         typeParser
-    ).map(([_1, as, _2, t]) => new Polytype(as, t));
+    ).map(([_1, as, _2, t]) => new Polytype(as, t))
+        .choice(typeParser.map(t => new Polytype([], t)));

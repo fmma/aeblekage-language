@@ -1,4 +1,5 @@
 import examples.bool
+import examples.number
 
 type test
     oneliner: number

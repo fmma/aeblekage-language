@@ -1,29 +1,12 @@
-import { polytypeParser } from "./parser/typeParser";
-import { Tsymbol } from "./types/ast/type/symbol";
-import { Polytype } from "./typing/polytype";
-import { Substitution } from "./typing/substitution";
-
 export class Binop {
-
-    type: Polytype;
 
     constructor(
         readonly symbol: string,
         readonly leftSubPrecedence: number,
         readonly rightSubPrecedence: number,
-        readonly precedence: number,
-        type: string,
-        readonly interp: (x: any, y: any) => any
+        readonly precedence: number
     ) {
         this.regexp = new RegExp(`^${escapeRegExp(symbol)}\\ *`);
-        const parsedType = polytypeParser.run(type);
-        if (parsedType == null)
-            throw new Error('Binop type parser failed');
-        parsedType[0] = parsedType[0].substitute(new Substitution({ 'bool': new Tsymbol('bool') }));
-
-        if (!parsedType[0].isClosed())
-            throw new Error(`Binop ${symbol} : ${parsedType[0].show()} has free vars.`);
-        this.type = parsedType[0];
     }
 
     regexp: RegExp;
@@ -43,17 +26,17 @@ export class BinopPrecedenceHierarchy {
 }
 
 export const binops = [
-    new Binop('||', 102, 103, 103, 'forall. bool -> bool -> bool', (x, y) => x || y),
-    new Binop('&&', 104, 105, 105, 'forall. bool -> bool -> bool', (x, y) => x && y),
-    new Binop('==', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x == y),
-    new Binop('>=', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x >= y),
-    new Binop('<=', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x <= y),
-    new Binop('>', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x > y),
-    new Binop('<', 106, 107, 107, 'forall a. a -> a -> bool', (x, y) => x < y),
-    new Binop('+', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x + y),
-    new Binop('-', 108, 109, 109, 'forall. number -> number -> number', (x, y) => x - y),
-    new Binop('*', 110, 111, 111, 'forall. number -> number -> number', (x, y) => x * y),
-    new Binop('/', 110, 111, 111, 'forall. number -> number -> number', (x, y) => x / y)
+    new Binop('||', 102, 103, 103),
+    new Binop('&&', 104, 105, 105),
+    new Binop('==', 106, 107, 107),
+    new Binop('>=', 106, 107, 107),
+    new Binop('<=', 106, 107, 107),
+    new Binop('>', 106, 107, 107),
+    new Binop('<', 106, 107, 107),
+    new Binop('+', 108, 109, 109),
+    new Binop('-', 108, 109, 109),
+    new Binop('*', 110, 111, 111),
+    new Binop('/', 110, 111, 111)
 ]
 
 export const binopPrecedenceHierarchy: BinopPrecedenceHierarchy = initializePrecedenceBinopHierarchy();

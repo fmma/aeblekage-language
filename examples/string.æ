@@ -1,0 +1,6 @@
+import examples.list
+
+type string
+    length: number
+    append: string -> string
+    split: string -> list string

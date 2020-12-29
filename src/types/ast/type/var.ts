@@ -34,4 +34,8 @@ export class Tvar extends Type {
         type: 'var' as const,
         value: this.name
     };
+
+    matchInterfaceType(): [string, Type[]] {
+        throw new Error(`Could not deduce interface type from type variable: ${this.show()}.`);
+    }
 }

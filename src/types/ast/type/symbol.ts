@@ -23,4 +23,8 @@ export class Tsymbol extends Type {
         name: this.name,
         args: []
     };
+
+    matchInterfaceType(): [string, Type[]] {
+        return [this.name, []];
+    }
 }

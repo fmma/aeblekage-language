@@ -1,6 +1,7 @@
 import examples.list
 import examples.bool
 import examples.maybe.just
+import examples.number
 
 type cons a : list a
     x : a

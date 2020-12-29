@@ -1,133 +1,122 @@
-import { Context } from "../../interp/context";
 import { Polytype } from "../../typing/polytype";
+import { Substitutable } from "../../typing/substitutable";
 import { Substitution } from "../../typing/substitution";
-import { loadImport } from "../../typing/typing";
 import { Ast } from "../ast";
 import { ClassType } from "./classType";
 import { Import } from "./import";
-import { Member } from "./member";
-import { MemberType } from "./memberType";
+import { Members } from "./members";
 import { Type } from "./type";
 import { Tapp } from "./type/app";
-import { Tfun } from "./type/fun";
 import { Tsymbol } from "./type/symbol";
 import { Tvar } from "./type/var";
 
-export interface ClassTypes {
-    constructorType: Polytype,
+export interface StaticClassTypes {
+    constructorType: Polytype | undefined,
     thisType: Type,
-    superType: Type
+    superType: Type,
+    imports?: Class[]
 }
 
-export class Class extends Ast {
+export class Class extends Ast implements Substitutable<Class> {
+    staticTypes: StaticClassTypes;
+
     constructor(
         readonly imports: Import[],
         readonly name: string,
         readonly params: string[],
         readonly iface: ClassType | undefined,
-        readonly members: (Member | MemberType)[],
-        types?: ClassTypes
+        readonly members: Members,
+        staticTypes?: StaticClassTypes
     ) {
         super();
-        this.defs = {};
-        this.types = {};
-        this.constructorArgTypes = [];
-        members
-            .filter(x => x instanceof Member)
-            .forEach(x => {
-                const m = x as Member
-                if (this.defs[x.name])
-                    throw new Error(`Redefinition of ${m.name} in class ${name}.`);
-                this.defs[x.name] = m;
-            });
-        members
-            .filter(x => x instanceof MemberType)
-            .forEach(x => {
-                const mt = x as MemberType;
-                if (this.types[x.name])
-                    throw new Error(`Redefinition of type ${mt.name} in class ${name}.`);
-                this.types[x.name] = mt;
-                if (!this.defs[x.name])
-                    this.constructorArgTypes.push(mt.value);
-            });
-
-        if (types == null) {
-            const thisType = params.reduce((t, x) => new Tapp(t, new Tvar(x)), new Tsymbol(name) as Type);
-            const superType =
-                iface
-                    ? iface.params.reduce((t, a) => new Tapp(t, a), new Tsymbol(iface.name) as Type)
-                    : thisType;
-            const constructorType = new Polytype(this.params,
-                this.constructorArgTypes.reduceRight((t2, t1) => new Tfun(t1, t2), superType));
-            this.specialTypes = {
-                thisType, superType, constructorType
-            }
-        }
-        else {
-            this.specialTypes = types;
-        }
+        this.staticTypes = this.initClassTypes(staticTypes);
     }
 
-    defs: Record<string, Member>;
-    types: Record<string, MemberType>;
-    constructorArgTypes: Type[];
-    specialTypes: ClassTypes;
-
-    thisEnv(): Record<string, Polytype | undefined> {
-        const env = {} as Record<string, Polytype | undefined>;
-        this.members
-            .filter(x => x instanceof MemberType)
-            .forEach(x => {
-                const mt = x as MemberType;
-                env[x.name] = mt.polytype();
-            });
-        env[this.name] = this.specialTypes.constructorType;
-        return env;
+    async getImports(): Promise<Class[]> {
+        if (this.staticTypes.imports)
+            return this.staticTypes.imports;
+        const css = await Promise.all(this.imports.map(i => i.loadImport()));
+        const result = [this, ...css.flat()];
+        this.staticTypes.imports = result;
+        return result;
     }
 
-    proto(ctx: Context<any>): object {
-        const ifaceProto = this.iface ? ctx.imports[this.iface.name]?.proto(ctx) ?? null : null;
-        const x = Object.create(ifaceProto);
-        Object.keys(this.defs).forEach(k => {
-            x[k] = this.defs[k].interp(ctx);
-        });
-        return x;
-    }
-
-    interpConstructor(ctx: Context<any>): any {
-        return this.constructerx(0, ctx);
-    }
-
-    constructerx(i: number, ctx: Context<any>): any {
-        if (i < this.constructorArgTypes.length) {
-            return (x: any) => this.constructerx(i + 1, ctx.add(`$${i}`, x));
-        }
-        return Object.create({}); // Add $i's to instance. Add members and iface members to proto.
+    async getSuperType(): Promise<Class | undefined> {
+        const { iface } = this;
+        if (iface == null)
+            return undefined;
+        const imports = await this.getImports();
+        const superType = imports.find(x => x.name === iface.name);
+        return superType?.instantiate(iface.params);
     }
 
     show(indent: number) {
         return [
             ...this.imports.map(i => i.show(indent)),
             this.indentedLine(indent, `class ${[this.name, ...this.params].join(' ')} ${this.iface ? this.iface.show() : ''}`),
-            ...this.members.map(m => m.show(2))
+            this.members.show(2)
         ].join('');
     }
 
     freeVars(set: Set<string>) {
-        for (let member of this.members) {
-            member.freeVars(set);
-        }
+        this.members.freeVars(set);
         this.iface?.freeVars(set);
         for (let param of this.params) {
             set.delete(param);
         }
-        set.delete(this.name);
-        if (this.iface)
-            set.delete(this.iface.name);
     }
 
-    async instantiate(ts: Type[]): Promise<Class> {
-        const imports = (await Promise.all(this.imports.map(loadImport))).flat();
+    getFreeVars(): string[] {
+        const set = new Set<string>();
+        this.freeVars(set);
+        return [...set];
+    }
+
+    isClosed() {
+        const set = new Set<string>();
+        this.freeVars(set);
+        return set.size === 0;
+    }
+
+    async typeCheck(): Promise<void> {
+        const arbitraryClass = (await this.arbitrary()).initializeSymbols();
+        const superType = (await arbitraryClass.getSuperType())?.initializeSymbols();
+        const imports = await arbitraryClass.getImports();
+
+        if (!arbitraryClass.isClosed())
+            throw new Error(`Unbound type variables ${arbitraryClass.getFreeVars().join(', ')} in class ${arbitraryClass.name}.`);
+
+        await arbitraryClass.members.typeCheck(this.staticTypes.superType, superType?.members, imports);
+    }
+
+    async arbitrary(): Promise<Class> {
+        return this.instantiate(this.params.map(x => new Tsymbol(`$${x}`)));
+    }
+
+    initializeSymbols(): Class {
+        const st = new Substitution({});
+        for (let i of this.getFreeVars()) {
+            st.subst[i] = new Tsymbol(i);
+        }
+        const result = this.substitute(st);
+        return result;
+    }
+
+    substitute(subst: Substitution): Class {
+        subst = subst.unset(this.params);
+        return new Class(this.imports,
+            this.name,
+            this.params,
+            this.iface?.substitute(subst),
+            this.members.substitute(subst),
+            {
+                constructorType: this.staticTypes.constructorType,
+                thisType: this.staticTypes.thisType.substitute(subst),
+                superType: this.staticTypes.superType.substitute(subst)
+            });
+    }
+
+    instantiate(ts: Type[]): Class {
         if (ts.length !== this.params.length)
             throw new Error(`Paramter count mismatch in instantiation of ${this.name} with (${ts.map(x => x.show()).join(', ')})`);
 
@@ -135,21 +124,40 @@ export class Class extends Ast {
         for (let i = 0; i < ts.length; ++i) {
             st.subst[this.params[i]] = ts[i];
         }
-        st.subst[this.name] = new Tsymbol(this.name);
-        if (this.iface)
-            st.subst[this.iface.name] = new Tsymbol(this.iface.name);
-        imports.forEach(i => {
-            st.subst[i.name] = new Tsymbol(i.name);
-        });
         return new Class(this.imports,
             this.name,
             [],
             this.iface?.substitute(st),
-            this.members.map(x => x.substitute(st)),
+            this.members.substitute(st),
             {
-                constructorType: this.specialTypes.constructorType,
-                thisType: this.specialTypes.thisType.substitute(st),
-                superType: this.specialTypes.superType.substitute(st)
+                constructorType: this.staticTypes.constructorType,
+                thisType: this.staticTypes.thisType.substitute(st),
+                superType: this.staticTypes.superType.substitute(st)
             });
+    }
+
+    async getType(memberName: string): Promise<Polytype> {
+        const t = this.members.getType(memberName);
+        if (t)
+            return t;
+        const iface = await this.getSuperType();
+        const pt = iface?.getType(memberName);
+        if (pt == null)
+            throw new Error(`No type definition of ${memberName} in class ${this.name}`);
+        return pt;
+    }
+
+    private initClassTypes(classTypes?: StaticClassTypes): StaticClassTypes {
+        if (classTypes != null)
+            return classTypes;
+        const thisType = this.params.reduce((t, x) => new Tapp(t, new Tvar(x)), new Tsymbol(this.name) as Type);
+        const superType =
+            this.iface
+                ? this.iface.params.reduce((t, a) => new Tapp(t, a), new Tsymbol(this.iface.name) as Type)
+                : thisType;
+        const constructorType = this.members.getConstructorType(this.params, superType);
+        return {
+            thisType, superType, constructorType
+        };
     }
 }

@@ -1,7 +1,11 @@
-import examples.bool
+import examples.bool.*
 import examples.unit
 
 type false : bool
     if t f = f unit
     and _ = false
     or b = b unit
+    && _ = false
+    || b = b
+    not = true
+    == b = b.not

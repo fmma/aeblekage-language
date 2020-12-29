@@ -3,7 +3,6 @@ import { Expr } from "../expr";
 import { StmtExprItem } from "../stmtExprItem";
 import { Type } from "../type";
 import { Tvar } from "../type/var";
-import { matchInterfaceType } from '../expr/memberAccess';
 import { Tfun } from "../type/fun";
 import { Context } from "../../../interp/context";
 
@@ -27,14 +26,8 @@ export class SEIchain extends StmtExprItem {
     typeInf(t: Type, env: Env): Type {
         const tx = Tvar.fresh();
         env.unification.delayUnify(t, async instanceType => {
-            const [f, ts] = matchInterfaceType(instanceType);
-            const iface = await env.imports[f]?.instantiate(ts);
-            if (iface == null)
-                throw new Error(`Could not find interface ${f} in ${this.show(0)}. Environment:${env.show()}`);
-            const mt = iface.types[this.x];
-            if (mt == null)
-                throw new Error(`Interface ${f} does not have a member ${this.x}.`)
-            env.unification.unify(mt.polytype().instantiate(), tx);
+            const mt = await env.getMemberType(instanceType, this.x);
+            env.unification.unify(mt.instantiate(), tx);
         });
         return this.es.reduce((t1, e) => {
             const t2 = e.typeInf(env);

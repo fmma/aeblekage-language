@@ -27,4 +27,8 @@ export class Tfun extends Type {
         name: '->',
         args: [this.t1, this.t2]
     };
+
+    matchInterfaceType(): [string, Type[]] {
+        throw new Error(`Function type is not an interface: ${this.show(0, 0)}.`);
+    }
 }

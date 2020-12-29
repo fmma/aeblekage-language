@@ -1,7 +1,9 @@
+import { binops } from "../binops";
 import { Class } from "../types/ast/class";
 import { ClassType } from "../types/ast/classType";
 import { Import } from "../types/ast/import";
 import { Member } from "../types/ast/member";
+import { Members } from "../types/ast/members";
 import { MemberType } from "../types/ast/memberType";
 import { Type } from "../types/ast/type";
 import { Tfun } from "../types/ast/type/fun";
@@ -9,6 +11,8 @@ import { indentedSeq, parseIdent, parseNewline } from "./common";
 import { Parser } from "./parser-combinators";
 import { stmtSequenceParser } from "./stmtParser";
 import { typeAtomParser, typeParser } from "./typeParser";
+
+export const parseMemberIdent = Parser.choices(parseIdent, ...binops.map(x => Parser.sat(x.regexp).map(x => x.trim())));
 
 export const astImportParser: Parser<Import>
     = Parser.do(
@@ -18,13 +22,13 @@ export const astImportParser: Parser<Import>
     ).map(([_, xs, star]) => new Import(star ? [...xs, star] : xs));
 
 export const astMemberTypeParser: Parser<MemberType>
-    = parseIdent.bind(f =>
+    = parseMemberIdent.bind(f =>
         parseIdent.many().bind(as =>
             Parser.sat(/^: */).pre(typeParser.choice(astTypeSequenceParser).map(t =>
                 new MemberType(f, as, t)))));
 
 export const astMemberParser: Parser<Member>
-    = parseIdent.bind(f => {
+    = parseMemberIdent.bind(f => {
         return parseIdent.many().bind(as =>
             Parser.sat(/^= */).pre(stmtSequenceParser.fatal(new Error(`Error in definition ${f}.`)))
                 .map(ss => new Member(f, as, ss)))
@@ -48,6 +52,9 @@ export const astClassParser: Parser<Class>
         parseIdent.many(),
         astParserClassInterface,
         indentedSeq(astMemberTypeParser.disjointChoice(astMemberParser).fatal(new Error(''))),
-    ).map(([is, _2, f, as, iface, ms]) => new Class(is, f, as, iface, ms));
+    ).map(([is, _2, f, as, iface, ms]) => {
+        return new Class(is, f, as, iface, Members.fromUnorderedList(ms))
+    });
+
 
 export const astParser = Parser.sat(/\s*/).pre(astClassParser);

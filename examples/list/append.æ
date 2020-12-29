@@ -1,5 +1,6 @@
 import examples.list
 import examples.maybe
+import examples.number
 
 type append a : list a
     xs : list a

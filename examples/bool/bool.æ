@@ -4,3 +4,7 @@ type bool
     if a: (unit -> a) -> (unit -> a) -> a
     and: (unit -> bool) -> bool
     or: (unit -> bool) -> bool
+    ||: bool -> bool
+    &&: bool -> bool
+    ==: bool -> bool
+    not: bool

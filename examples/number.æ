@@ -1,0 +1,15 @@
+import examples.bool
+
+type number
+    abs: number
+    sqrt: number
+    show: string
+    +: number -> number
+    *: number -> number
+    /: number -> number
+    -: number -> number
+    >: number -> bool
+    <: number -> bool
+    >=: number -> bool
+    <=: number -> bool
+    ==: number -> bool

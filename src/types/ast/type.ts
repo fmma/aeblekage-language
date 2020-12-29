@@ -12,6 +12,7 @@ export type UnificationType = { type: 'cstr', name: string, args: Type[] } | { t
 export abstract class Type extends Ast implements Substitutable<Type> {
     abstract substitute(subst: Substitution): Type;
     abstract freeVars(set: Set<string>): void;
+    abstract matchInterfaceType(): [string, Type[]];
 
     occurs(x: string): boolean {
         const set = new Set<string>();

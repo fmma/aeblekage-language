@@ -31,4 +31,9 @@ export class Tapp extends Type {
         args: [this.t1, this.t2]
     };
 
+    matchInterfaceType(): [string, Type[]] {
+        const [f, ts] = this.t1.matchInterfaceType();
+        ts.push(this.t2);
+        return [f, ts];
+    }
 }

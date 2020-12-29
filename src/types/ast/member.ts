@@ -3,6 +3,7 @@ import { Env } from "../../typing/env";
 import { Substitutable } from "../../typing/substitutable";
 import { Ast } from "../ast";
 import { Stmt } from "./stmt";
+import { Sassign } from "./stmt/assign";
 import { Type } from "./type";
 import { Tfun } from "./type/fun";
 import { Tvar } from "./type/var";
@@ -14,6 +15,10 @@ export class Member extends Ast implements Substitutable<Member> {
         readonly value: Stmt
     ) {
         super();
+    }
+
+    stmt(): Stmt {
+        return this.args.length === 0 ? this.value : new Sassign('', this.args, this.value);
     }
 
     show(indent: number) {
