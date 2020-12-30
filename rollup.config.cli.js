@@ -1,5 +1,5 @@
 export default {
-    input: 'dist/cli/cli.js',
+    input: 'dist/cli/main.js',
     output: {
         file: 'cli.js',
         format: 'cjs'

@@ -1,3 +1,4 @@
+import { FileIO } from "../fileio";
 import { Class } from "../types/ast/class";
 import { Type } from "../types/ast/type";
 import { Polytype } from "./polytype";
@@ -5,6 +6,7 @@ import { Unification } from "./unification";
 
 export class Env {
     constructor(
+        readonly fileIO: FileIO,
         readonly env: Record<string, Polytype | undefined>,
         readonly imports: Record<string, Class | undefined>,
         readonly unification: Unification
@@ -20,7 +22,7 @@ export class Env {
 
     add(x: string, t: Type | Polytype): Env {
         const pt = t instanceof Type ? new Polytype([], t) : t;
-        return new Env({ ...this.env, [x]: pt }, this.imports, this.unification);
+        return new Env(this.fileIO, { ...this.env, [x]: pt }, this.imports, this.unification);
     }
 
     addAll(xts: [string, Type | Polytype][]) {
@@ -30,7 +32,7 @@ export class Env {
             xpts[x] = pt;
         });
 
-        return new Env({ ...this.env, ...xpts }, this.imports, this.unification);
+        return new Env(this.fileIO, { ...this.env, ...xpts }, this.imports, this.unification);
     }
 
     show(): string {
@@ -42,10 +44,10 @@ export class Env {
     async getMemberType(instanceType: Type, memberName: string): Promise<Polytype> {
         try {
             const [f, ts] = instanceType.matchInterfaceType();
-            const iface = await this.imports[f]?.instantiate(ts);
+            const iface = this.imports[f]?.instantiate(ts);
             if (iface == null)
                 throw new Error(`Could not find interface ${f}. Environment:${this.show()}`);
-            const t = await iface.getType(memberName);
+            const t = await iface.getType(this.fileIO, memberName);
             if (t == null)
                 throw new Error(`Interface ${f} does not have a member ${memberName}.`)
             return t;
@@ -55,6 +57,6 @@ export class Env {
     }
 
     beginUnification(): Env {
-        return new Env(this.env, this.imports, new Unification());
+        return new Env(this.fileIO, this.env, this.imports, new Unification());
     }
 }

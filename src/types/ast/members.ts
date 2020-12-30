@@ -1,3 +1,4 @@
+import { FileIO } from "../../fileio";
 import { Env } from "../../typing/env";
 import { Polytype } from "../../typing/polytype";
 import { Substitutable } from "../../typing/substitutable";
@@ -107,15 +108,15 @@ export class Members extends Ast implements Substitutable<Members> {
         return this.getDef(memberName)?.type;
     }
 
-    async typeCheck(thisType: Type, superMembers: Members | undefined, imports: Class[]): Promise<void> {
-        const env = this.createEnv(thisType, superMembers, imports);
+    async typeCheck(fileIO: FileIO, thisType: Type, superMembers: Members | undefined, imports: Class[]): Promise<void> {
+        const env = this.createEnv(fileIO, thisType, superMembers, imports);
         for (let def of this.defs) {
             await this.typeCheckDef(superMembers, env, def);
         }
     }
 
-    private createEnv(thisType: Type, superMembers: Members | undefined, imports: Class[]): Env {
-        const env = new Env({}, {}, new Unification());
+    private createEnv(fileIO: FileIO, thisType: Type, superMembers: Members | undefined, imports: Class[]): Env {
+        const env = new Env(fileIO, {}, {}, new Unification());
         for (let def of superMembers?.defs ?? []) {
             if (def.type)
                 env.env[def.name] = def.type;

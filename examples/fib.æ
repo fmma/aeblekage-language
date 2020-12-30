@@ -1,0 +1,16 @@
+import examples.number
+import examples.bool
+import examples.unit
+
+type Fib
+    x: number
+
+    fib: number -> number
+    fib x = (x == 0).if
+        _ => 1
+        _ => x * fib (x - 1)
+
+    main: unit
+    main = 
+        fib x
+        unit

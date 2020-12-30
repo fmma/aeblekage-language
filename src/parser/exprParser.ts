@@ -7,8 +7,7 @@ import { EmemberAccess } from "../types/ast/expr/memberAccess";
 import { Enumber } from "../types/ast/expr/number";
 import { Estring } from "../types/ast/expr/string";
 import { Evar } from "../types/ast/expr/var";
-import { StmtSequence } from "../types/ast/stmt/stmtSequence";
-import { indentedSeq1, parseIdent } from "./common";
+import { parseIdent } from "./common";
 import { Parser } from "./parser-combinators";
 
 export const exprAtomParser: Parser<Expr>

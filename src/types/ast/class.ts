@@ -1,3 +1,4 @@
+import { FileIO } from "../../fileio";
 import { Polytype } from "../../typing/polytype";
 import { Substitutable } from "../../typing/substitutable";
 import { Substitution } from "../../typing/substitution";
@@ -32,20 +33,20 @@ export class Class extends Ast implements Substitutable<Class> {
         this.staticTypes = this.initClassTypes(staticTypes);
     }
 
-    async getImports(): Promise<Class[]> {
+    async getImports(fileIO: FileIO): Promise<Class[]> {
         if (this.staticTypes.imports)
             return this.staticTypes.imports;
-        const css = await Promise.all(this.imports.map(i => i.loadImport()));
+        const css = await Promise.all(this.imports.map(i => i.loadImport(fileIO)));
         const result = [this, ...css.flat()];
         this.staticTypes.imports = result;
         return result;
     }
 
-    async getSuperType(): Promise<Class | undefined> {
+    async getSuperType(fileIO: FileIO): Promise<Class | undefined> {
         const { iface } = this;
         if (iface == null)
             return undefined;
-        const imports = await this.getImports();
+        const imports = await this.getImports(fileIO);
         const superType = imports.find(x => x.name === iface.name);
         return superType?.instantiate(iface.params);
     }
@@ -78,15 +79,15 @@ export class Class extends Ast implements Substitutable<Class> {
         return set.size === 0;
     }
 
-    async typeCheck(): Promise<void> {
+    async typeCheck(fileIO: FileIO): Promise<void> {
         const arbitraryClass = (await this.arbitrary()).initializeSymbols();
-        const superType = (await arbitraryClass.getSuperType())?.initializeSymbols();
-        const imports = await arbitraryClass.getImports();
+        const superType = (await arbitraryClass.getSuperType(fileIO))?.initializeSymbols();
+        const imports = await arbitraryClass.getImports(fileIO);
 
         if (!arbitraryClass.isClosed())
             throw new Error(`Unbound type variables ${arbitraryClass.getFreeVars().join(', ')} in class ${arbitraryClass.name}.`);
 
-        await arbitraryClass.members.typeCheck(this.staticTypes.superType, superType?.members, imports);
+        await arbitraryClass.members.typeCheck(fileIO, this.staticTypes.superType, superType?.members, imports);
     }
 
     async arbitrary(): Promise<Class> {
@@ -136,12 +137,12 @@ export class Class extends Ast implements Substitutable<Class> {
             });
     }
 
-    async getType(memberName: string): Promise<Polytype> {
+    async getType(fileIO: FileIO, memberName: string): Promise<Polytype> {
         const t = this.members.getType(memberName);
         if (t)
             return t;
-        const iface = await this.getSuperType();
-        const pt = iface?.getType(memberName);
+        const iface = await this.getSuperType(fileIO);
+        const pt = iface?.getType(fileIO, memberName);
         if (pt == null)
             throw new Error(`No type definition of ${memberName} in class ${this.name}`);
         return pt;

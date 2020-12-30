@@ -1,4 +1,4 @@
-import { requireImportPath } from "../../fileio";
+import { FileIO } from "../../fileio";
 import { Ast } from "../ast";
 import { Class } from "./class";
 
@@ -13,8 +13,8 @@ export class Import extends Ast {
         return this.indentedLine(indent, 'import ' + this.path.join('.'));
     }
 
-    async loadImport(): Promise<Class[]> {
-        const result = await requireImportPath(this.path);
+    async loadImport(fileIO: FileIO): Promise<Class[]> {
+        const result = await fileIO.requireImportPath(this.path);
         return result.map(x => x.initializeSymbols());
     }
 }

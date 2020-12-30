@@ -1,70 +1,49 @@
-import { promises } from 'fs';
-import { requireAndTypeCheck, _debugTurnTyping } from '../typing/typing';
 import path from 'path';
-import { glob } from '../fileio';
 import { exit } from 'process';
-import yargs from 'yargs';
-import { _debugAlwaysShowParethesis, _debugTurnOnAlwaysShowParethesis } from '../types/ast';
+import { FileIO } from '../fileio';
+import { _debugTurnOnAlwaysShowParethesis } from '../types/ast';
 import { _debugTurnOnUnify } from '../typing/unification';
-import { recoverSanitizedSrc, sanitizeSrc } from '../parser/indentTokenizer';
+import { TokensAction } from './actions/tokens';
+import { TypecheckAction } from './actions/typecheck';
+import { CliArgs } from './cliArgs';
 
-const argz = yargs(process.argv.slice(2))
-    .option('debug', {
-        alias: 'd',
-        type: 'boolean',
-        description: 'Turn on debug info'
-    })
-    .option('dumpStackTraceOnError', {
-        alias: 's',
-        type: 'boolean'
-    })
-    .option('tokens', {
-        type: 'boolean'
-    })
-    .argv;
+export class Cli {
 
-async function go(fp: string, osFp: string) {
-    try {
-        process.stdout.write(fp + '... ');
-        if (argz.tokens) {
-            const input = await promises.readFile(osFp, "utf8");
-            console.log('\n');
-            const tokens = sanitizeSrc(input);
-            console.log(tokens);
-            console.log('--');
-            console.log(recoverSanitizedSrc(tokens));
+    fileIO = new FileIO();
+
+    async runClient(cliArgs: CliArgs) {
+        if (cliArgs.debug) {
+            _debugTurnOnAlwaysShowParethesis();
+            _debugTurnOnUnify();
         }
-        else
-            await requireAndTypeCheck(fp);
-        process.stdout.write('OK\n');
 
+        const args = cliArgs._.flatMap(x => typeof x === 'number' ? [] : [x]);
+        if (args[0] == null)
+            return;
+        const fps = await this.fileIO.glob(args);
+        for (let fp of fps) {
+            if (path.extname(fp) === '.æ') {
+                const path = fp.replace('.æ', '').split(/[\/\\]/).join('.');
+                await this.runAeblekageFile(cliArgs, path, fp);
+            }
+        }
     }
-    catch (error) {
-        if (error instanceof Error) {
-            console.log(argz.dumpStackTraceOnError ? error : error.message);
+
+    async runAeblekageFile(cliArgs: CliArgs, path: string, osFp: string) {
+        try {
+            if (cliArgs.tokens)
+                return new TokensAction().go(this.fileIO, path, osFp, cliArgs);
+
+            return await new TypecheckAction().go(this.fileIO, path, osFp, cliArgs);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.log(cliArgs.dumpStackTraceOnError ? error : error.message);
+                exit(1);
+            }
+            console.log(error);
+            console.warn('Warning error was not an Error.');
             exit(1);
         }
-        console.log(error);
-        console.warn('Warning error was not an Error.');
-        exit(1);
-    }
-};
-
-(async () => {
-    if (argz.debug) {
-        _debugTurnOnAlwaysShowParethesis();
-        _debugTurnOnUnify();
-        _debugTurnTyping();
-    }
-
-    const args = argz._.flatMap(x => typeof x === 'number' ? [] : [x]);
-    if (args[0] == null)
-        return;
-    const fps = await glob(args);
-    for (let fp of fps) {
-        if (path.extname(fp) === '.æ') {
-            const path = fp.replace('.æ', '').split(/[\/\\]/).join('.');
-            await go(path, fp);
-        }
-    }
-})();
+    };
+}

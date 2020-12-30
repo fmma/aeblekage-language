@@ -21,21 +21,26 @@ export const astImportParser: Parser<Import>
         Parser.sat(/^\.\* */).map(_ => '*').optional()
     ).map(([_, xs, star]) => new Import(star ? [...xs, star] : xs));
 
-export const astMemberTypeParser: Parser<MemberType>
-    = parseMemberIdent.bind(f =>
-        parseIdent.many().bind(as =>
-            Parser.sat(/^: */).pre(typeParser.choice(astTypeSequenceParser).map(t =>
-                new MemberType(f, as, t)))));
-
-export const astMemberParser: Parser<Member>
-    = parseMemberIdent.bind(f => {
-        return parseIdent.many().bind(as =>
-            Parser.sat(/^= */).pre(stmtSequenceParser.fatal(new Error(`Error in definition ${f}.`)))
-                .map(ss => new Member(f, as, ss)))
-    });
-
 export const astTypeSequenceParser: Parser<Type>
     = indentedSeq(typeParser).map(ts => ts.reduceRight((t2, t1) => new Tfun(t1, t2)));
+
+export const astMemberTypeParser: Parser<MemberType>
+    = Parser.do(
+        parseMemberIdent,
+        parseIdent.many(),
+        Parser.sat(/^: */),
+        typeParser.choice(astTypeSequenceParser)
+    ).map(([f, as, _, t]) => new MemberType(f, as, t));
+
+export const astMemberParser: Parser<Member>
+    = Parser.do(
+        parseMemberIdent,
+        parseIdent.many(),
+        Parser.sat(/^= */),
+        stmtSequenceParser.fatal(new Error(`Error in definition.`))
+    ).map(
+        (([f, as, _, ss]) => new Member(f, as, ss))
+    );
 
 export const astParserClassInterface: Parser<ClassType | undefined>
     = Parser.do(
