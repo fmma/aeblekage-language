@@ -2,7 +2,7 @@ import { promises } from 'fs';
 import globlib from 'glob';
 import { astParser } from "./parser/astParser";
 import { recoverSanitizedSrc, sanitizeSrc } from './parser/indentTokenizer';
-import { Class } from './types/ast/class';
+import { Class } from './ast/class';
 
 export class FileIO {
 

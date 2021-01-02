@@ -1,5 +1,5 @@
-import { Type } from "../types/ast/type";
-import { Tvar } from "../types/ast/type/var";
+import { Type } from "../ast/type";
+import { Tvar } from "../ast/type/var";
 import { Substitutable } from "./substitutable";
 
 export class Substitution implements Substitutable<Substitution> {

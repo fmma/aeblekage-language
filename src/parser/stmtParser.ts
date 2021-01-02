@@ -1,10 +1,10 @@
-import { Stmt } from "../types/ast/stmt";
-import { Sassign } from "../types/ast/stmt/assign";
-import { Sexpr } from "../types/ast/stmt/expr";
-import { StmtSequence } from "../types/ast/stmt/stmtSequence";
-import { StmtExprItem } from "../types/ast/stmtExprItem";
-import { SEIapp } from "../types/ast/stmtExprItem/app";
-import { SEIchain } from "../types/ast/stmtExprItem/chain";
+import { Stmt } from "../ast/stmt";
+import { Sassign } from "../ast/stmt/assign";
+import { Sexpr } from "../ast/stmt/expr";
+import { StmtSequence } from "../ast/stmt/stmtSequence";
+import { StmtExprItem } from "../ast/stmtExprItem";
+import { SEIapp } from "../ast/stmtExprItem/app";
+import { SEIchain } from "../ast/stmtExprItem/chain";
 import { indentedSeq, indentedSeq1, parseIdent } from "./common";
 import { exprAccessParser, exprParser } from "./exprParser";
 import { Parser } from "./parser-combinators";

@@ -1,5 +1,5 @@
-import { Context } from "../../../interp/context";
-import { Env } from "../../../typing/env";
+import { Context } from "../../interp/context";
+import { Env } from "../../typing/env";
 import { Expr } from "../expr";
 import { StmtExprItem } from "../stmtExprItem";
 import { Type } from "../type";

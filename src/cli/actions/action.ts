@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { Class } from "../../types/ast/class";
+import { Class } from "../../ast/class";
 import { GoArgs } from "./goArgs";
 
 export abstract class Action {

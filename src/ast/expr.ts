@@ -1,6 +1,6 @@
-import { Context } from "../../interp/context";
-import { Env } from "../../typing/env";
-import { Ast } from "../ast";
+import { Context } from "../interp/context";
+import { Env } from "../typing/env";
+import { Ast } from "./ast";
 import { Type } from "./type";
 
 // e ::= x | e e | e <binop> e | e.x | x => e | e; e | x = e | <number> | <string>

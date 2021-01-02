@@ -1,5 +1,5 @@
 import { FileIO } from "../fileio";
-import { Class } from "../types/ast/class";
+import { Class } from "../ast/class";
 
 export class Context<T> {
     constructor(

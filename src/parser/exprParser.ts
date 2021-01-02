@@ -1,12 +1,12 @@
 import { BinopPrecedenceHierarchy, binopPrecedenceHierarchy } from "../binops";
-import { Expr } from "../types/ast/expr";
-import { Eapp } from "../types/ast/expr/app";
-import { Ebinop } from "../types/ast/expr/binop";
-import { Elambda } from "../types/ast/expr/lambda";
-import { EmemberAccess } from "../types/ast/expr/memberAccess";
-import { Enumber } from "../types/ast/expr/number";
-import { Estring } from "../types/ast/expr/string";
-import { Evar } from "../types/ast/expr/var";
+import { Expr } from "../ast/expr";
+import { Eapp } from "../ast/expr/app";
+import { Ebinop } from "../ast/expr/binop";
+import { Elambda } from "../ast/expr/lambda";
+import { EmemberAccess } from "../ast/expr/memberAccess";
+import { Enumber } from "../ast/expr/number";
+import { Estring } from "../ast/expr/string";
+import { Evar } from "../ast/expr/var";
 import { parseIdent } from "./common";
 import { Parser } from "./parser-combinators";
 

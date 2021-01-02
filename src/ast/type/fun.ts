@@ -1,4 +1,4 @@
-import { Substitution } from "../../../typing/substitution";
+import { Substitution } from "../../typing/substitution";
 import { Type } from "../type";
 
 export class Tfun extends Type {

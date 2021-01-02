@@ -1,7 +1,7 @@
 import path from 'path';
 import { exit } from 'process';
 import { FileIO } from '../fileio';
-import { _debugTurnOnAlwaysShowParethesis } from '../types/ast';
+import { _debugTurnOnAlwaysShowParethesis } from '../ast/ast';
 import { _debugTurnOnUnify } from '../typing/unification';
 import { TokensAction } from './actions/tokens';
 import { TypecheckAction } from './actions/typecheck';

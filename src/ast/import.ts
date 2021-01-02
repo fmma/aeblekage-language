@@ -1,5 +1,5 @@
-import { FileIO } from "../../fileio";
-import { Ast } from "../ast";
+import { FileIO } from "../fileio";
+import { Ast } from "./ast";
 import { Class } from "./class";
 
 export class Import extends Ast {

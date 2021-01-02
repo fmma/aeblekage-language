@@ -1,8 +1,8 @@
-import { FileIO } from "../../fileio";
-import { Polytype } from "../../typing/polytype";
-import { Substitutable } from "../../typing/substitutable";
-import { Substitution } from "../../typing/substitution";
-import { Ast } from "../ast";
+import { FileIO } from "../fileio";
+import { Polytype } from "../typing/polytype";
+import { Substitutable } from "../typing/substitutable";
+import { Substitution } from "../typing/substitution";
+import { Ast } from "./ast";
 import { ClassType } from "./classType";
 import { Import } from "./import";
 import { Members } from "./members";

@@ -1,10 +1,10 @@
-import { FileIO } from "../../fileio";
-import { Env } from "../../typing/env";
-import { Polytype } from "../../typing/polytype";
-import { Substitutable } from "../../typing/substitutable";
-import { Substitution } from "../../typing/substitution";
-import { Unification } from "../../typing/unification";
-import { Ast } from "../ast";
+import { FileIO } from "../fileio";
+import { Env } from "../typing/env";
+import { Polytype } from "../typing/polytype";
+import { Substitutable } from "../typing/substitutable";
+import { Substitution } from "../typing/substitution";
+import { Unification } from "../typing/unification";
+import { Ast } from "./ast";
 import { Class } from "./class";
 import { Member } from "./member";
 import { MemberType } from "./memberType";

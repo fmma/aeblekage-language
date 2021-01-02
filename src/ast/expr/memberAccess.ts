@@ -1,6 +1,6 @@
-import { Context } from "../../../interp/context";
-import { Env } from "../../../typing/env";
-import { Polytype } from "../../../typing/polytype";
+import { Context } from "../../interp/context";
+import { Env } from "../../typing/env";
+import { Polytype } from "../../typing/polytype";
 import { Expr } from "../expr";
 import { Type } from "../type";
 import { Tapp } from "../type/app";

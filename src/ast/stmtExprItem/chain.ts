@@ -1,10 +1,10 @@
-import { Env } from "../../../typing/env";
+import { Env } from "../../typing/env";
 import { Expr } from "../expr";
 import { StmtExprItem } from "../stmtExprItem";
 import { Type } from "../type";
 import { Tvar } from "../type/var";
 import { Tfun } from "../type/fun";
-import { Context } from "../../../interp/context";
+import { Context } from "../../interp/context";
 
 export class SEIchain extends StmtExprItem {
 

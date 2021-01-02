@@ -1,4 +1,4 @@
-import { Type } from "../types/ast/type";
+import { Type } from "../ast/type";
 import { resetFresh } from "./fresh";
 import { Substitution } from "./substitution";
 

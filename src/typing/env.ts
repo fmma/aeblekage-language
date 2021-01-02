@@ -1,6 +1,6 @@
 import { FileIO } from "../fileio";
-import { Class } from "../types/ast/class";
-import { Type } from "../types/ast/type";
+import { Class } from "../ast/class";
+import { Type } from "../ast/type";
 import { Polytype } from "./polytype";
 import { Unification } from "./unification";
 

@@ -1,8 +1,8 @@
-import { Type } from '../types/ast/type';
-import { Tapp } from '../types/ast/type/app';
-import { Tfun } from '../types/ast/type/fun';
-import { Tsymbol } from '../types/ast/type/symbol';
-import { Tvar } from '../types/ast/type/var';
+import { Type } from '../ast/type';
+import { Tapp } from '../ast/type/app';
+import { Tfun } from '../ast/type/fun';
+import { Tsymbol } from '../ast/type/symbol';
+import { Tvar } from '../ast/type/var';
 import { Polytype } from '../typing/polytype';
 import { parseIdent } from './common';
 import { Parser } from './parser-combinators';

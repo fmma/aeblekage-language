@@ -1,7 +1,7 @@
-import { Context } from "../../interp/context";
-import { Env } from "../../typing/env";
-import { Substitutable } from "../../typing/substitutable";
-import { Ast } from "../ast";
+import { Context } from "../interp/context";
+import { Env } from "../typing/env";
+import { Substitutable } from "../typing/substitutable";
+import { Ast } from "./ast";
 import { Stmt } from "./stmt";
 import { Sassign } from "./stmt/assign";
 import { Type } from "./type";
