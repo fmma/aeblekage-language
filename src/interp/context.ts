@@ -1,7 +1,9 @@
+import { FileIO } from "../fileio";
 import { Class } from "../types/ast/class";
 
 export class Context<T> {
     constructor(
+        readonly fileIO: FileIO,
         readonly env: Record<string, T | undefined>,
         readonly imports: Record<string, Class | undefined>
     ) {
@@ -15,7 +17,7 @@ export class Context<T> {
     }
 
     add(x: string, value: T): Context<T> {
-        return new Context({ ...this.env, [x]: value }, this.imports);
+        return new Context(this.fileIO, { ...this.env, [x]: value }, this.imports);
     }
 
     addAll(xts: [string, T][]) {
@@ -24,7 +26,7 @@ export class Context<T> {
             vs[x] = v;
         });
 
-        return new Context({ ...this.env, ...vs }, this.imports);
+        return new Context(this.fileIO, { ...this.env, ...vs }, this.imports);
     }
 
     show(): string {

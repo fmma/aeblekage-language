@@ -1,9 +1,12 @@
-import { FileIO } from "../../fileio";
-import { CliArgs } from "../cliArgs";
 import { Action } from "./action";
+import { GoArgs } from "./goArgs";
 
 export class RunAction extends Action {
-    go(fileIO: FileIO, fp: string, osFp: string, args: CliArgs): Promise<number> {
-        throw new Error("Method not implemented.");
+    async go(goArgs: GoArgs): Promise<number | void> {
+        const classes = await this.mapGoClass(goArgs, cl => cl);
+        const main = classes.find(cl => cl.members.getDef('main') != null);
+        if (main == null)
+            throw new Error('No main definition found.');
+        // main.construct()['main']();
     }
 }

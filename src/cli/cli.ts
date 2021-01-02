@@ -24,17 +24,23 @@ export class Cli {
         for (let fp of fps) {
             if (path.extname(fp) === '.æ') {
                 const path = fp.replace('.æ', '').split(/[\/\\]/).join('.');
-                await this.runAeblekageFile(cliArgs, path, fp);
+                await this.runAeblekageFile(cliArgs, path.split('.'), fp);
             }
         }
     }
 
-    async runAeblekageFile(cliArgs: CliArgs, path: string, osFp: string) {
+    async runAeblekageFile(cliArgs: CliArgs, path: string[], osFp: string) {
+        const goArgs = {
+            fileIO: this.fileIO,
+            path: path,
+            osFp: osFp,
+            args: cliArgs
+        }
         try {
             if (cliArgs.tokens)
-                return new TokensAction().go(this.fileIO, path, osFp, cliArgs);
+                return new TokensAction().run(goArgs);
 
-            return await new TypecheckAction().go(this.fileIO, path, osFp, cliArgs);
+            return await new TypecheckAction().run(goArgs);
         }
         catch (error) {
             if (error instanceof Error) {
