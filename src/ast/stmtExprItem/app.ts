@@ -1,8 +1,8 @@
 import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
-import { Expr } from "../expr";
-import { StmtExprItem } from "../stmtExprItem";
-import { Type } from "../type";
+import { Expr } from "../expr/expr";
+import { StmtExprItem } from "./stmtExprItem";
+import { Type } from "../type/type";
 import { Tfun } from "../type/fun";
 import { Tvar } from "../type/var";
 

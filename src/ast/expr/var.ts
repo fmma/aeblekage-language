@@ -1,7 +1,7 @@
 import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
-import { Expr } from "../expr";
-import { Type } from "../type";
+import { Expr } from "./expr";
+import { Type } from "../type/type";
 
 export class Evar extends Expr {
     constructor(

@@ -1,15 +1,15 @@
-import { FileIO } from "../fileio";
-import { Polytype } from "../typing/polytype";
-import { Substitutable } from "../typing/substitutable";
-import { Substitution } from "../typing/substitution";
-import { Ast } from "./ast";
+import { FileIO } from "../../fileio";
+import { Polytype } from "../../typing/polytype";
+import { Substitutable } from "../../typing/substitutable";
+import { Substitution } from "../../typing/substitution";
+import { Ast } from "../ast";
 import { ClassType } from "./classType";
 import { Import } from "./import";
 import { Members } from "./members";
-import { Type } from "./type";
-import { Tapp } from "./type/app";
-import { Tsymbol } from "./type/symbol";
-import { Tvar } from "./type/var";
+import { Type } from "../type/type";
+import { Tapp } from "../type/app";
+import { Tsymbol } from "../type/symbol";
+import { Tvar } from "../type/var";
 
 export interface StaticClassTypes {
     constructorType: Polytype | undefined,

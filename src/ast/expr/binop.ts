@@ -1,8 +1,8 @@
 import { Binop } from "../../binops";
 import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
-import { Expr } from "../expr";
-import { Type } from "../type";
+import { Expr } from "./expr";
+import { Type } from "../type/type";
 import { Tfun } from "../type/fun";
 import { Tvar } from "../type/var";
 

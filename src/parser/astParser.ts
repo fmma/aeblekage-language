@@ -1,11 +1,11 @@
 import { binops } from "../binops";
-import { Class } from "../ast/class";
-import { ClassType } from "../ast/classType";
-import { Import } from "../ast/import";
-import { Member } from "../ast/member";
-import { Members } from "../ast/members";
-import { MemberType } from "../ast/memberType";
-import { Type } from "../ast/type";
+import { Class } from "../ast/class/class";
+import { ClassType } from "../ast/class/classType";
+import { Import } from "../ast/class/import";
+import { Member } from "../ast/class/member";
+import { Members } from "../ast/class/members";
+import { MemberType } from "../ast/class/memberType";
+import { Type } from "../ast/type/type";
 import { Tfun } from "../ast/type/fun";
 import { indentedSeq, parseIdent, parseNewline } from "./common";
 import { Parser } from "./parser-combinators";

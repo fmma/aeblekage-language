@@ -1,8 +1,8 @@
-import { Stmt } from "../ast/stmt";
+import { Stmt } from "../ast/stmt/stmt";
 import { Sassign } from "../ast/stmt/assign";
 import { Sexpr } from "../ast/stmt/expr";
 import { StmtSequence } from "../ast/stmt/stmtSequence";
-import { StmtExprItem } from "../ast/stmtExprItem";
+import { StmtExprItem } from "../ast/stmtExprItem/stmtExprItem";
 import { SEIapp } from "../ast/stmtExprItem/app";
 import { SEIchain } from "../ast/stmtExprItem/chain";
 import { indentedSeq, indentedSeq1, parseIdent } from "./common";

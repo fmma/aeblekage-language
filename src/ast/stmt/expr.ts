@@ -1,9 +1,9 @@
 import { Context } from '../../interp/context';
 import { Env } from '../../typing/env';
-import { Expr } from '../expr';
-import { Stmt } from '../stmt';
-import { StmtExprItem } from '../stmtExprItem';
-import { Type } from '../type';
+import { Expr } from '../expr/expr';
+import { Stmt } from './stmt';
+import { StmtExprItem } from '../stmtExprItem/stmtExprItem';
+import { Type } from '../type/type';
 
 export class Sexpr extends Stmt {
 

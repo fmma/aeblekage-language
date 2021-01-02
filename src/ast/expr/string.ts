@@ -1,5 +1,5 @@
-import { Expr } from "../expr";
-import { Type } from "../type";
+import { Expr } from "./expr";
+import { Type } from "../type/type";
 import { Tsymbol } from "../type/symbol";
 
 export class Estring extends Expr {

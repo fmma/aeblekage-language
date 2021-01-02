@@ -1,6 +1,6 @@
 import { fresh } from "../../typing/fresh";
 import { Substitution } from "../../typing/substitution";
-import { Type } from "../type";
+import { Type } from "./type";
 import { Tsymbol } from "./symbol";
 
 export class Tvar extends Type {

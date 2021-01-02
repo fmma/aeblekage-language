@@ -1,6 +1,6 @@
-import { Substitutable } from "../typing/substitutable";
-import { Substitution } from "../typing/substitution";
-import { Ast } from "./ast";
+import { Substitutable } from "../../typing/substitutable";
+import { Substitution } from "../../typing/substitution";
+import { Ast } from "../ast";
 
 export type UnificationType = { type: 'cstr', name: string, args: Type[] } | { type: 'var', value: string };
 

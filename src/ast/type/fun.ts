@@ -1,5 +1,5 @@
 import { Substitution } from "../../typing/substitution";
-import { Type } from "../type";
+import { Type } from "./type";
 
 export class Tfun extends Type {
     constructor(

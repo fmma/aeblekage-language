@@ -1,4 +1,4 @@
-import { Type } from "../ast/type";
+import { Type } from "../ast/type/type";
 import { Instatiable } from "./instatiable";
 import { Substitutable } from "./substitutable";
 import { Substitution } from "./substitution";

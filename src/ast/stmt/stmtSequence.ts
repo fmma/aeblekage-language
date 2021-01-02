@@ -1,7 +1,7 @@
 import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
-import { Stmt } from "../stmt";
-import { Type } from "../type";
+import { Stmt } from "./stmt";
+import { Type } from "../type/type";
 
 export class StmtSequence extends Stmt {
     constructor(

@@ -1,5 +1,5 @@
 import { Substitution } from "../../typing/substitution";
-import { Type, UnificationType } from "../type";
+import { Type, UnificationType } from "./type";
 
 export class Tapp extends Type {
     constructor(

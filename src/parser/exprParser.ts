@@ -1,5 +1,5 @@
 import { BinopPrecedenceHierarchy, binopPrecedenceHierarchy } from "../binops";
-import { Expr } from "../ast/expr";
+import { Expr } from "../ast/expr/expr";
 import { Eapp } from "../ast/expr/app";
 import { Ebinop } from "../ast/expr/binop";
 import { Elambda } from "../ast/expr/lambda";

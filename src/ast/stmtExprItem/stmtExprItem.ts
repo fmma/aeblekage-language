@@ -1,7 +1,7 @@
-import { Context } from "../interp/context";
-import { Env } from "../typing/env";
-import { Ast } from "./ast";
-import { Type } from "./type";
+import { Context } from "../../interp/context";
+import { Env } from "../../typing/env";
+import { Ast } from "../ast";
+import { Type } from "../type/type";
 
 export abstract class StmtExprItem extends Ast {
 

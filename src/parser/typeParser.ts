@@ -1,4 +1,4 @@
-import { Type } from '../ast/type';
+import { Type } from '../ast/type/type';
 import { Tapp } from '../ast/type/app';
 import { Tfun } from '../ast/type/fun';
 import { Tsymbol } from '../ast/type/symbol';

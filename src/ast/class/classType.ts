@@ -1,7 +1,7 @@
-import { Substitutable } from "../typing/substitutable";
-import { Substitution } from "../typing/substitution";
-import { Ast } from "./ast";
-import { Type } from "./type";
+import { Substitutable } from "../../typing/substitutable";
+import { Substitution } from "../../typing/substitution";
+import { Ast } from "../ast";
+import { Type } from "../type/type";
 
 export class ClassType extends Ast implements Substitutable<ClassType> {
     constructor(

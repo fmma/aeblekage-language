@@ -1,16 +1,16 @@
-import { FileIO } from "../fileio";
-import { Env } from "../typing/env";
-import { Polytype } from "../typing/polytype";
-import { Substitutable } from "../typing/substitutable";
-import { Substitution } from "../typing/substitution";
-import { Unification } from "../typing/unification";
-import { Ast } from "./ast";
+import { FileIO } from "../../fileio";
+import { Env } from "../../typing/env";
+import { Polytype } from "../../typing/polytype";
+import { Substitutable } from "../../typing/substitutable";
+import { Substitution } from "../../typing/substitution";
+import { Unification } from "../../typing/unification";
+import { Ast } from "../ast";
 import { Class } from "./class";
 import { Member } from "./member";
 import { MemberType } from "./memberType";
-import { Stmt } from "./stmt";
-import { Type } from "./type";
-import { Tfun } from "./type/fun";
+import { Stmt } from "../stmt/stmt";
+import { Type } from "../type/type";
+import { Tfun } from "../type/fun";
 
 export interface Definition {
     name: string,
