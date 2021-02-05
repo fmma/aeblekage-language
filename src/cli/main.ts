@@ -1,4 +1,12 @@
 import { Cli } from "./cli";
 import { CliArgsClass } from "./cliArgs";
+import { configureServices } from './services';
 
-new Cli().runClient(new CliArgsClass().cliArgs);
+async function run() {
+    const clientArgs = new CliArgsClass().cliArgs;
+    const services = await configureServices(clientArgs);
+    new Cli(services).runClient(clientArgs);
+}
+
+run();
+

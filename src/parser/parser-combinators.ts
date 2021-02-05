@@ -1,4 +1,4 @@
-import { recoverSanitizedSrc } from "./indentTokenizer";
+import { IndentTokenizer } from "./indentTokenizer";
 
 const _cache: Record<string, Parser<any>> = {};
 
@@ -143,11 +143,11 @@ export class Parser<A> {
         return ps.reduce((p1, p2) => p1.choice(p2));
     }
 
-    fatal(error: Error): Parser<A> {
+    fatal(indentTokenize: IndentTokenizer, error: Error): Parser<A> {
         return new Parser(cs => {
             const r = this.run(cs);
             if (r == null) {
-                error.message += ": Unexpected:\n>>> " + recoverSanitizedSrc(cs);
+                error.message += ": Unexpected:\n>>> " + indentTokenize.recoverSanitizedSrc(cs);
                 throw error;
             }
             return r;

@@ -18,7 +18,7 @@ export abstract class Action {
 
 
     async mapGoClass<A>(goArgs: GoArgs, f: (cl: Class) => Promise<A> | A): Promise<A[]> {
-        const classes = await goArgs.fileIO.requireImportPath(goArgs.path);
+        const classes = await goArgs.services.fileIO.requireImportPath(goArgs.path);
         return await Promise.all(classes.map(cl => f(cl)));
     }
 }

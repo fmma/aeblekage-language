@@ -1,15 +1,15 @@
 import path from 'path';
 import { exit } from 'process';
-import { FileIO } from '../fileio';
 import { _debugTurnOnAlwaysShowParethesis } from '../ast/ast';
 import { _debugTurnOnUnify } from '../typing/unification';
 import { TokensAction } from './actions/tokens';
 import { TypecheckAction } from './actions/typecheck';
 import { CliArgs } from './cliArgs';
+import { Services } from './services';
 
 export class Cli {
 
-    fileIO = new FileIO();
+    constructor(readonly services: Services) { }
 
     async runClient(cliArgs: CliArgs) {
         if (cliArgs.debug) {
@@ -20,7 +20,7 @@ export class Cli {
         const args = cliArgs._.flatMap(x => typeof x === 'number' ? [] : [x]);
         if (args[0] == null)
             return;
-        const fps = await this.fileIO.glob(args);
+        const fps = await this.services.fileIO.glob(args);
         for (let fp of fps) {
             if (path.extname(fp) === '.æ') {
                 const path = fp.replace('.æ', '').split(/[\/\\]/).join('.');
@@ -31,7 +31,7 @@ export class Cli {
 
     async runAeblekageFile(cliArgs: CliArgs, path: string[], osFp: string) {
         const goArgs = {
-            fileIO: this.fileIO,
+            services: this.services,
             path: path,
             osFp: osFp,
             args: cliArgs

@@ -1,8 +1,8 @@
-import { FileIO } from "../../fileio";
+import { Services } from "../services";
 import { CliArgs } from "../cliArgs";
 
 export interface GoArgs {
-    fileIO: FileIO;
+    services: Services;
     path: string[];
     osFp: string;
     args: CliArgs;

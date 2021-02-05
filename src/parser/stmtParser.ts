@@ -5,47 +5,54 @@ import { StmtSequence } from "../ast/stmt/stmtSequence";
 import { StmtExprItem } from "../ast/stmtExprItem/stmtExprItem";
 import { SEIapp } from "../ast/stmtExprItem/app";
 import { SEIchain } from "../ast/stmtExprItem/chain";
-import { indentedSeq, indentedSeq1, parseIdent } from "./common";
-import { exprAccessParser, exprParser } from "./exprParser";
+import { ParserUtils } from "./parserUtils";
+import { ExprParser } from "./exprParser";
 import { Parser } from "./parser-combinators";
 
-export const stmtExprItemAppParser: Parser<StmtExprItem>
-    = exprParser.map(x => new SEIapp(x));
+export class StmtParser {
 
-export const stmtExprItemChainParser: Parser<StmtExprItem>
-    = Parser.do(
-        Parser.sat(/^\. */),
-        parseIdent,
-        exprAccessParser.many()
-    ).map(([_, x, es]) => new SEIchain(x, es));
+    constructor(
+        readonly exprParser: ExprParser,
+        readonly parserUtils: ParserUtils) { }
 
-export const stmtExprItemParser: Parser<StmtExprItem>
-    = Parser.choices(
-        stmtExprItemAppParser,
-        stmtExprItemChainParser
-    );
+    readonly stmtExprItemAppParser: Parser<StmtExprItem>
+        = this.exprParser.exprParser.map(x => new SEIapp(x));
 
-export const stmtExprParser: Parser<Stmt>
-    = Parser.do(
-        exprParser,
-        indentedSeq(stmtExprItemParser)
-    ).map(([x, items]) => new Sexpr(x, items));
+    readonly stmtExprItemChainParser: Parser<StmtExprItem>
+        = Parser.do(
+            Parser.sat(/^\. */),
+            this.parserUtils.parseIdent,
+            this.exprParser.exprAccessParser.many()
+        ).map(([_, x, es]) => new SEIchain(x, es));
 
-export const stmtAssignParser: Parser<Stmt>
-    = Parser.do(
-        parseIdent.many1(),
-        Parser.sat(/^= */),
-        Parser.pure(0).bind(_ => stmtSequenceParser)
-    ).map(([[x, ...xs], _, s]) => new Sassign(x, xs, s));
+    readonly stmtExprItemParser: Parser<StmtExprItem>
+        = Parser.choices(
+            this.stmtExprItemAppParser,
+            this.stmtExprItemChainParser
+        );
 
-export const stmtParser: Parser<Stmt>
-    = Parser.choices(
-        stmtAssignParser,
-        stmtExprParser
-    );
+    readonly stmtExprParser: Parser<Stmt>
+        = Parser.do(
+            this.exprParser.exprParser,
+            this.parserUtils.indentedSeq(this.stmtExprItemParser)
+        ).map(([x, items]) => new Sexpr(x, items));
 
-export const stmtSequenceParser: Parser<Stmt>
-    = Parser.choices(
-        stmtExprParser,
-        indentedSeq1(stmtParser).map(x => new StmtSequence(x))
-    );
+    readonly stmtAssignParser: Parser<Stmt>
+        = Parser.do(
+            this.parserUtils.parseIdent.many1(),
+            Parser.sat(/^= */),
+            Parser.pure(0).bind(_ => this.stmtSequenceParser)
+        ).map(([[x, ...xs], _, s]) => new Sassign(x, xs, s));
+
+    readonly stmtParser: Parser<Stmt>
+        = Parser.choices(
+            this.stmtAssignParser,
+            this.stmtExprParser
+        );
+
+    readonly stmtSequenceParser: Parser<Stmt>
+        = Parser.choices(
+            this.stmtExprParser,
+            this.parserUtils.indentedSeq1(this.stmtParser).map(x => new StmtSequence(x))
+        );
+}

@@ -1,3 +1,31 @@
+export interface BinopConfig {
+    ops: string,
+    l?: BinopConfig,
+    r?: BinopConfig,
+    lr?: BinopConfig
+}
+
+
+// promises.readFile('./src/binops.json').then(x => {
+//     const binops: BinopConfig = parseBinopConfig(JSON.parse(x.toString()));
+// });
+
+export function parseBinopConfig(config: BinopConfig): BinopPrecedenceHierarchy {
+    const go: (cfg: BinopConfig, prec: number) => BinopPrecedenceHierarchy = (cfg, prec) => {
+        if ([cfg.l, cfg.r, cfg.lr].filter(x => x).length > 1)
+            throw new Error();
+        const leftPrec = cfg.l == null && cfg.lr == null ? prec : prec - 1;
+        const rightPrec = cfg.r == null && cfg.lr == null ? prec : prec - 1;
+        const subCfg = cfg.l ?? cfg.r ?? cfg.lr;
+        return new BinopPrecedenceHierarchy(
+            prec,
+            cfg.ops.split(' ').map(x => new Binop(x, leftPrec, rightPrec, prec)),
+            subCfg == null ? undefined : go(subCfg, prec + 2)
+        );
+    };
+    return go(config, 103);
+}
+
 export class Binop {
 
     constructor(
@@ -23,46 +51,9 @@ export class BinopPrecedenceHierarchy {
         readonly sub?: BinopPrecedenceHierarchy
     ) {
     }
-}
 
-export const binops = [
-    new Binop('||', 102, 103, 103),
-    new Binop('&&', 104, 105, 105),
-    new Binop('==', 106, 107, 107),
-    new Binop('>=', 106, 107, 107),
-    new Binop('<=', 106, 107, 107),
-    new Binop('>', 106, 107, 107),
-    new Binop('<', 106, 107, 107),
-    new Binop('+', 108, 109, 109),
-    new Binop('-', 108, 109, 109),
-    new Binop('*', 110, 111, 111),
-    new Binop('/', 110, 111, 111)
-]
-
-export const binopPrecedenceHierarchy: BinopPrecedenceHierarchy = initializePrecedenceBinopHierarchy();
-
-export function initializePrecedenceBinopHierarchy(): BinopPrecedenceHierarchy {
-    const binopsPrecedenceGroups = new Map<number, Binop[]>();
-    binops.forEach(b => {
-        const list = binopsPrecedenceGroups.get(b.precedence);
-        if (list == null) {
-            binopsPrecedenceGroups.set(b.precedence, [b]);
-        }
-        else {
-            list.push(b);
-        }
-    });
-
-    const entries = [...binopsPrecedenceGroups.entries()].sort((a, b) => b[0] - a[0]);
-
-    let h: BinopPrecedenceHierarchy | undefined = undefined;
-
-    for (let i = 0; i < entries.length; ++i) {
-        const binops = entries[i][1];
-        h = new BinopPrecedenceHierarchy(entries[i][0], binops, h);
+    allBinops(): Binop[] {
+        return [...this.binops, ...this.sub?.allBinops() ?? []];
     }
-
-    return h as BinopPrecedenceHierarchy;
 }
 
-initializePrecedenceBinopHierarchy();

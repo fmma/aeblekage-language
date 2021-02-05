@@ -1,10 +1,15 @@
 import { promises } from 'fs';
 import globlib from 'glob';
-import { astParser } from "./parser/astParser";
-import { recoverSanitizedSrc, sanitizeSrc } from './parser/indentTokenizer';
 import { Class } from './ast/class/class';
+import { AstParser } from "./parser/astParser";
+import { IndentTokenizer } from './parser/indentTokenizer';
 
 export class FileIO {
+
+    constructor(
+        readonly astParser: AstParser,
+        readonly indentTokenizer: IndentTokenizer
+    ) { }
 
     libDirs = ['.'];
 
@@ -16,12 +21,12 @@ export class FileIO {
         if (cachedValue)
             return cachedValue;
         let input = await promises.readFile(fp, "utf8");
-        input = sanitizeSrc(input)
-        const result = astParser.run(input);
+        input = this.indentTokenizer.sanitizeSrc(input)
+        const result = this.astParser.astParser.run(input);
         if (result == null)
-            throw new Error(`Parse error in ${fp}. Tokens:\n${recoverSanitizedSrc(input)}`);
+            throw new Error(`Parse error in ${fp}. Tokens:\n${this.indentTokenizer.recoverSanitizedSrc(input)}`);
         if (result[1] < input.length)
-            throw new Error(`Incomplete parse in ${fp}. Tokens:\n${recoverSanitizedSrc(input.substring(result[1]))}`)
+            throw new Error(`Incomplete parse in ${fp}. Tokens:\n${this.indentTokenizer.recoverSanitizedSrc(input.substring(result[1]))}`)
         this.fileCache[fp] = result[0];
         return result[0];
     }
