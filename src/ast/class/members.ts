@@ -1,26 +1,29 @@
 import { FileIO } from "../../fileio";
+import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
 import { Polytype } from "../../typing/polytype";
 import { Substitutable } from "../../typing/substitutable";
 import { Substitution } from "../../typing/substitution";
 import { Unification } from "../../typing/unification";
 import { Ast } from "../ast";
+import { Stmt } from "../stmt/stmt";
+import { Tfun } from "../type/fun";
+import { Type } from "../type/type";
 import { Class } from "./class";
 import { Member } from "./member";
 import { MemberType } from "./memberType";
-import { Stmt } from "../stmt/stmt";
-import { Type } from "../type/type";
-import { Tfun } from "../type/fun";
 
-export interface Definition {
-    name: string,
-    stmt?: Stmt,
-    type?: Polytype
+export interface Definition<T, S> {
+    name: string;
+    type: T;
+    stmt: S;
 }
+
+export type Def = Definition<Polytype | undefined, Stmt | undefined>
 
 export class Members extends Ast implements Substitutable<Members> {
     constructor(
-        readonly defs: Definition[],
+        readonly defs: Def[],
     ) {
         super();
     }
@@ -29,7 +32,7 @@ export class Members extends Ast implements Substitutable<Members> {
         return this.defs.map(d => this.showDef(indent, d)).join('');
     }
 
-    private showDef(indent: number, def: Definition): string {
+    private showDef(indent: number, def: Def): string {
         let result = '';
         if (def.type) {
             result += this.indentedLine(indent, def.name + ' : ' + def.type.show());
@@ -79,7 +82,7 @@ export class Members extends Ast implements Substitutable<Members> {
                 }
             }
         }
-        const defs: Definition[] = [];
+        const defs: Def[] = [];
         for (let [v, t] of Object.values(list)) {
 
             defs.push({ name: v?.name ?? t?.name ?? '', stmt: v?.stmt(), type: t?.polytype() });
@@ -87,20 +90,24 @@ export class Members extends Ast implements Substitutable<Members> {
         return new Members(defs);
     }
 
-    getTypeDefs(): Polytype[] {
+    getTypeDefs(): Definition<Polytype, undefined>[] {
         return this.defs.flatMap(x => {
-            return x?.type && x?.stmt == null ? [x.type] : [];
+            return x?.type && x?.stmt == null ? [{
+                name: x.name,
+                type: x.type,
+                stmt: undefined
+            }] : [];
         });
     }
 
     getConstructorType(params: string[], superType: Type): Polytype | undefined {
         const ts = this.getTypeDefs();
-        if (ts.some(t => t.params.length > 0))
+        if (ts.some(t => t.type.params.length > 0))
             return undefined;
-        return new Polytype(params, ts.reduceRight((t2, t1) => new Tfun(t1.monotype, t2), superType))
+        return new Polytype(params, ts.reduceRight((t2, t1) => new Tfun(t1.type.monotype, t2), superType))
     }
 
-    getDef(name: string): Definition | undefined {
+    getDef(name: string): Def | undefined {
         return this.defs.find(x => x.name === name);
     }
 
@@ -138,13 +145,23 @@ export class Members extends Ast implements Substitutable<Members> {
         return env;
     }
 
-    private async typeCheckDef(superMembers: Members | undefined, env: Env, def: Definition): Promise<void> {
+    private async typeCheckDef(superMembers: Members | undefined, env: Env, def: Def): Promise<void> {
         if (def.stmt) {
             const t = def.type ?? superMembers?.getType(def.name);
             if (t == null)
                 throw new Error(`No type for ${def.name}.`);
             await this.typeCheckStmt(env, def.stmt, t);
         }
+    }
+
+    construct(ctx: Context<any>, superMembers: Members | undefined): Record<string, any> {
+        const obj: Record<string, any> = superMembers?.construct(ctx, undefined) ?? {};
+        for (let def of this.defs) {
+            if (def.stmt) {
+                obj[def.name] = def.stmt.interp(ctx)[0];
+            }
+        }
+        return obj;
     }
 
     private async typeCheckStmt(env: Env, stmt: Stmt, type: Polytype): Promise<void> {

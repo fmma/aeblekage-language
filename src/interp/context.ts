@@ -5,7 +5,7 @@ export class Context<T> {
     constructor(
         readonly fileIO: FileIO,
         readonly env: Record<string, T | undefined>,
-        readonly imports: Record<string, Class | undefined>
+        readonly imports: Record<string, Class[]>
     ) {
     }
 
@@ -33,5 +33,9 @@ export class Context<T> {
         return Object.keys(this.env)
             .map(x => `${x} => ${this.env[x]}`)
             .join('\n') + '\nImports: ' + Object.keys(this.imports).join(',');
+    }
+
+    getClass(ctxName: string, className: string): Class | undefined {
+        return this.imports[ctxName]?.find(cl => cl.name === className);
     }
 }

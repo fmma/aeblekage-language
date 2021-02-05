@@ -1,15 +1,16 @@
 import { FileIO } from "../../fileio";
+import { Context } from "../../interp/context";
 import { Polytype } from "../../typing/polytype";
 import { Substitutable } from "../../typing/substitutable";
 import { Substitution } from "../../typing/substitution";
 import { Ast } from "../ast";
+import { Tapp } from "../type/app";
+import { Tsymbol } from "../type/symbol";
+import { Type } from "../type/type";
+import { Tvar } from "../type/var";
 import { ClassType } from "./classType";
 import { Import } from "./import";
 import { Members } from "./members";
-import { Type } from "../type/type";
-import { Tapp } from "../type/app";
-import { Tsymbol } from "../type/symbol";
-import { Tvar } from "../type/var";
 
 export interface StaticClassTypes {
     constructorType: Polytype | undefined,
@@ -31,6 +32,14 @@ export class Class extends Ast implements Substitutable<Class> {
     ) {
         super();
         this.staticTypes = this.initClassTypes(staticTypes);
+    }
+
+    async getImportsRecursive(fileIO: FileIO, imports: Record<string, Class[]>): Promise<void> {
+        if (imports[this.name])
+            return;
+        const classes = await this.getImports(fileIO);
+        imports[this.name] = classes;
+        await Promise.all(classes.map(cl => cl.getImportsRecursive(fileIO, imports)));
     }
 
     async getImports(fileIO: FileIO): Promise<Class[]> {
@@ -146,6 +155,19 @@ export class Class extends Ast implements Substitutable<Class> {
         if (pt == null)
             throw new Error(`No type definition of ${memberName} in class ${this.name}`);
         return pt;
+    }
+
+    construct(ctx: Context<any>, fileIO: FileIO, i: number = 0) {
+        const constructorArgs = this.members.getTypeDefs();
+        if (i < constructorArgs.length) {
+            return (x: any) => {
+                const obj = this.construct(ctx, fileIO, i + 1);
+                obj[constructorArgs[i].name] = x;
+                return obj;
+            }
+        }
+        const superType = this.iface ? ctx.getClass(this.name, this.iface.name) : undefined;
+        return this.members.construct(ctx, superType?.members);
     }
 
     private initClassTypes(classTypes?: StaticClassTypes): StaticClassTypes {

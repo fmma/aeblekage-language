@@ -6,7 +6,7 @@ export abstract class Action {
     abstract go(goArgs: GoArgs): Promise<number | void>
 
     async run(goArgs: GoArgs): Promise<void> {
-        process.stdout.write(goArgs.path + '...');
+        process.stdout.write(goArgs.path.join('.') + '...');
         const ret = await this.go(goArgs);
         if (ret === 0 || ret == null) {
             process.stdout.write(' OK\n');

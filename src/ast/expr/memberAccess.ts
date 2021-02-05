@@ -1,11 +1,8 @@
 import { Context } from "../../interp/context";
 import { Env } from "../../typing/env";
-import { Polytype } from "../../typing/polytype";
-import { Expr } from "./expr";
 import { Type } from "../type/type";
-import { Tapp } from "../type/app";
-import { Tsymbol } from "../type/symbol";
 import { Tvar } from "../type/var";
+import { Expr } from "./expr";
 
 export class EmemberAccess extends Expr {
     constructor(
