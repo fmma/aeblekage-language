@@ -13,15 +13,15 @@ export async function configureServices(clientArgs: CliArgs) {
     const binopConfigFile = await promises.readFile('./src/binops.json');
     const binopsPrecedenceHiearchery = parseBinopConfig(JSON.parse(binopConfigFile.toString()));
     const indentTokenizer = new IndentTokenizer();
-    const commen = new ParserUtils();
-    const typeParser = new TypeParser(commen);
-    const exprParser = new ExprParser(commen, binopsPrecedenceHiearchery);
-    const stmtParser = new StmtParser(exprParser, commen);
-    const astParser = new AstParser(commen, binopsPrecedenceHiearchery.allBinops(), typeParser, stmtParser, indentTokenizer);
+    const parserUtils = new ParserUtils();
+    const typeParser = new TypeParser(parserUtils);
+    const exprParser = new ExprParser(parserUtils, binopsPrecedenceHiearchery);
+    const stmtParser = new StmtParser(exprParser, parserUtils);
+    const astParser = new AstParser(parserUtils, binopsPrecedenceHiearchery.allBinops(), typeParser, stmtParser, indentTokenizer);
     const fileIO = new FileIO(astParser, indentTokenizer);
     return {
         binopsPrecedenceHiearchery: binopsPrecedenceHiearchery,
-        commen: commen,
+        parserUtils: parserUtils,
         typeParser: typeParser,
         exprParser: exprParser,
         stmtParser: stmtParser,
