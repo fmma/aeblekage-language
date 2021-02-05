@@ -2,4 +2,4 @@ import examples.either
 
 type left a b : either a b
     value: a
-    case f g = f value
+    case f _ = f value

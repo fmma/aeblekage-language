@@ -14,10 +14,12 @@ type cons a : list a
     append ys = cons x (xs.append ys)
     length = 1 + xs.length
     map f = cons (f x) (xs.map f)
+    
     flatmap f = 
         ys = f x
         zs = xs.flatmap f
         ys.append zs
+
     filter f = (f x).if
         _ => cons x (xs.filter f)
         _ => xs.filter f
