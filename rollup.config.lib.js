@@ -1,5 +1,5 @@
 export default {
-    input: 'dist/parser/typeParser.js',
+    input: 'dist/cli/services.js',
     output: {
         file: 'bundle.js',
         format: 'cjs'

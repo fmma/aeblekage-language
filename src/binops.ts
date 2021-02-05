@@ -5,11 +5,6 @@ export interface BinopConfig {
     lr?: BinopConfig
 }
 
-
-// promises.readFile('./src/binops.json').then(x => {
-//     const binops: BinopConfig = parseBinopConfig(JSON.parse(x.toString()));
-// });
-
 export function parseBinopConfig(config: BinopConfig): BinopPrecedenceHierarchy {
     const go: (cfg: BinopConfig, prec: number) => BinopPrecedenceHierarchy = (cfg, prec) => {
         if ([cfg.l, cfg.r, cfg.lr].filter(x => x).length > 1)
